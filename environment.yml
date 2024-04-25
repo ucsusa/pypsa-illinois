@@ -1,0 +1,35 @@
+name: pypsa-illinois
+channels:
+    - conda-forge
+dependencies:
+    # Requirements for core model functionality
+    - python==3.10.13
+    - pip
+    - ipython
+    - matplotlib
+    - pandas
+    - geopandas
+    - numpy
+    - scipy
+    - ipykernel
+    - jupyter
+    - jupyterlab
+    - seaborn
+    - pypsa
+    - plotly
+    - pyarrow
+    - iprogress
+    - pyogrio
+    - fiona
+    - momepy
+    - pysal
+    - osmnx
+    - spyder-kernels=2.5
+    - pip:
+      - gridstatus
+      - python-dotenv
+      - highspy
+      - nrelpy
+      - us
+      - census
+      - streamlit

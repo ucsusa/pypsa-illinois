@@ -23,3 +23,4 @@ cd pypsa-illinois
 mamba env create  # mamba and conda may be used interchangeably, here
 mamba activate pypsa-illinois
 ```
+

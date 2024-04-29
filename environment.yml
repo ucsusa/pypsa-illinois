@@ -25,6 +25,18 @@ dependencies:
     - pysal
     - osmnx
     - spyder-kernels=2.5
+    - unyt
+    - cartopy
+    - descartes
+    - lxml
+    - snakemake
+    - pycountry
+    - yaml
+    - geopy
+    - tqdm
+    - graphviz
+    - networkx
+    - pytz
     - pip:
       - gridstatus
       - python-dotenv

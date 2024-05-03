@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
@@ -9,8 +8,12 @@ import json
 import geopandas as gpd
 from gridstatus import EIA
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv("../.env")
+
+curr_dir_os = Path(os.path.dirname(os.path.abspath(__file__)))
+
+load_dotenv(curr_dir_os/"../.env")
 
 
 eia = EIA()
@@ -80,6 +83,7 @@ if __name__ == "__main__":
     
     response = r.json()['response']
     
+    print(f"Total records: {response['total']}")
     
     data = response['data']
     
@@ -91,4 +95,4 @@ if __name__ == "__main__":
     
     gdf['nameplate-capacity-mw'] = gdf['nameplate-capacity-mw'].astype('float')
     
-    gdf.to_csv("../data/illinois_power_plants.csv")
+    gdf.to_csv(str(curr_dir_os/"../data/illinois_power_plants.csv"))

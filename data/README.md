@@ -12,3 +12,13 @@ the data to the folder `pypsa-illinois/data/transmission-lines` and unzip. `pyps
 called `pypsa-illinois/data/transmission_lines/Electric__Power_Transmission_Lines/Electric__Power_Transmission_Lines.shp`.
 
 #### [Download the data here](https://atlas.eia.gov/datasets/geoplatform::transmission-lines/about)
+
+
+## Electric Service Territories
+
+The data for electric service territories is also availabe through EIA and HIFLD. Similar to the transmission line data,
+there is no method for extracting the data programmatically. Users attempting to replicate this work should download
+the data to the folder `pypsa-illinois/data/service-territories` and unzip. `pypsa-illinois` expects a shapefile dataset
+called `pypsa-illinois/data/transmission_lines/Electric__Power_Transmission_Lines/Electric__Power_Transmission_Lines.shp`.
+
+#### [Download the data here](https://atlas.eia.gov/datasets/geoplatform::electric-retail-service-territories-2/about)

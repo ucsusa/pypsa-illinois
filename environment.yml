@@ -37,6 +37,7 @@ dependencies:
     - graphviz
     - networkx
     - pytz
+    - camelot-py
     - pip:
       - gridstatus
       - python-dotenv

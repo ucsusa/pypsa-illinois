@@ -39,7 +39,8 @@ end_str = "2024-04"
 frequency= 'monthly'
 facets = {
         #   'balancing_authority_code':['SWPP'],
-          'stateid':['IL']
+          'stateid':['IL'],
+          'status':['OP','SB','OA']
           }
 
 params = {

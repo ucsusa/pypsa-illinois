@@ -1,5 +1,9 @@
 # Data for PyPSA-Illinois
 
+## Existing Power Plants
+
+Data on existing power plants comes from EIA Form 823, accessed via the EIA APIv2 with the script `scripts/existing_power_plants.py`.
+
 
 ## Transmission Lines and Buses
 

@@ -1,6 +1,7 @@
 name: pypsa-illinois
 channels:
     - conda-forge
+    - bioconda
 dependencies:
     # Requirements for core model functionality
     - python==3.10.13
@@ -29,7 +30,7 @@ dependencies:
     - cartopy
     - descartes
     - lxml
-    - snakemake
+    - snakemake-minimal
     - pycountry
     - yaml
     - geopy

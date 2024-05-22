@@ -23,12 +23,8 @@ parameters = {'lon':40.09,
               'leap_day':'true',
               'selector':'POINT',
               'utc':'false',
-              'interval':'30',
-              'attr_list':['ghi',
-                           'wind_speed',
-                           'air_temperature',
-                           'relative_humidity',
-                           'surface_pressure']}
+              'interval':'60',
+              'attr_list':['ghi']}
 
 
 def make_wkt(selector, lat, lon):

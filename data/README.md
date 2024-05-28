@@ -26,3 +26,19 @@ the data to the folder `pypsa-illinois/data/service-territories` and unzip. `pyp
 called `pypsa-illinois/data/transmission_lines/Electric__Power_Transmission_Lines/Electric__Power_Transmission_Lines.shp`.
 
 #### [Download the data here](https://atlas.eia.gov/datasets/geoplatform::electric-retail-service-territories-2/about)
+
+
+## Solar and Wind Resource Data 
+
+Solar and wind resource data are extracted from the National Solar Radiation Database (NSRDB) and Wind Toolkit (WTK), respectively.
+
+The data are extracted using functions in the file `functions/nrel_data_api.py`. These functions are deployed in the notebook `notebooks/nrel_data_download.ipynb`.
+
+### [NSRDB](https://nsrdb.nrel.gov/about/what-is-the-nsrdb)
+
+> The NSRDB (Sengupta et al., 2018) is a high temporal and spatial resolution dataset consisting of the three most widely used measurements of solar radiation—global horizontal, direct normal, and diffuse horizontal irradiance—as well as other meteorological data. The earlier versions of the NSRDB were modeled using cloud and weather information primarily collected at airports. An adequate number of locations and temporal and spatial scales were used to accurately represent regional solar radiation climates. More details on the NSRDB version history can be found here. The current NSRDB is modeled using the NREL’s Physical Solar Model (PSM) with inputs from multi-channel measurements obtained from the Geostationary Operational Environmental Satellite (GOES) of the National Oceanic and Atmospheric Administration (NOAA), the Interactive Multisensor Snow and Ice Mapping System (IMS) of the National Ice Center (NIC), and the Moderate Resolution Imaging Spectroradiometer (MODIS) and Modern Era Retrospective analysis for Research and Applications, version 2 (MERRA-2), of the National Aeronautics and Space Administration (NASA). The PSM is a two-step physical modeling process, in which cloud and aerosol properties are derived, collected and resampled in the initial step and then fed as inputs into a radiative transfer model, the Fast All-sky Radiation Model for Solar applications (FARMS) (Xie et al., 2016), in the subsequent step. Using the FARMS with Narrowband Irradiances for Tilted surfaces (FARMS-NIT) (Xie and Sengupta, 2018; Xie et al., 2018; Xie et al., 2019), the NSRDB can also provide users with spectral-on-demand irradiances based on their selection of time, location, and PV orientation.
+
+
+### Wind Toolkit
+
+> The Wind Integration National Dataset (WIND) Toolkit is an update and expansion of the Eastern Integration Data Set and Western Wind Integration Data Set. It supports the next generation of wind integration studies. The WIND Toolkit includes meteorological conditions and turbine power for more than 126,000 sites in the continental United States for the years 2007—2013. Read more at http://www.nrel.gov/grid/wind-toolkit.html

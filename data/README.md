@@ -12,7 +12,7 @@ through the Homeland Infrastructure Foundation Level Database (HIFLD).
 
 Unfortunately, due to the size of the file, the data are not included in this repository. Data about the
 buses are imputed from the transmission line dataset. Users attempting to replicate this work should download
-the data to the folder `pypsa-illinois/data/transmission-lines` and unzip. `pypsa-illinois` expects a shapefile dataset
+the data to the folder `pypsa-illinois/data/transmission_lines` and unzip. `pypsa-illinois` expects a shapefile dataset
 called `pypsa-illinois/data/transmission_lines/Electric__Power_Transmission_Lines/Electric__Power_Transmission_Lines.shp`.
 
 #### [Download the data here](https://atlas.eia.gov/datasets/geoplatform::transmission-lines/about)
@@ -22,8 +22,8 @@ called `pypsa-illinois/data/transmission_lines/Electric__Power_Transmission_Line
 
 The data for electric service territories is also availabe through EIA and HIFLD. Similar to the transmission line data,
 there is no method for extracting the data programmatically. Users attempting to replicate this work should download
-the data to the folder `pypsa-illinois/data/service-territories` and unzip. `pypsa-illinois` expects a shapefile dataset
-called `pypsa-illinois/data/transmission_lines/Electric__Power_Transmission_Lines/Electric__Power_Transmission_Lines.shp`.
+the data to the folder `pypsa-illinois/data/spatial-data` and unzip. `pypsa-illinois` expects a shapefile dataset
+called `pypsa-illinois/data/spatial-data/Electric_Retail_Service_Territories/Electric_Retail_Service_Territories.shp`.
 
 #### [Download the data here](https://atlas.eia.gov/datasets/geoplatform::electric-retail-service-territories-2/about)
 
@@ -33,6 +33,8 @@ called `pypsa-illinois/data/transmission_lines/Electric__Power_Transmission_Line
 Solar and wind resource data are extracted from the National Solar Radiation Database (NSRDB) and Wind Toolkit (WTK), respectively.
 
 The data are extracted using functions in the file `functions/nrel_data_api.py`. These functions are deployed in the notebook `notebooks/nrel_data_download.ipynb`.
+
+See comments on the function `make_csv_url` in `nrel_data_api.py` regarding the NREL API key, which is needed for this function to work. [These instructions (for Windows)](https://medium.com/analytics-vidhya/hide-your-secret-keys-with-conda-1d22e42b82ed) can be used to add an API key to the conda environment.
 
 ### [NSRDB](https://nsrdb.nrel.gov/about/what-is-the-nsrdb)
 

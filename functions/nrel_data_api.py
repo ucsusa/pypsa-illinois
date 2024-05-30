@@ -10,12 +10,12 @@ load_dotenv("../.env")
 
 nrel_api_key = os.environ.get('NREL_API_KEY')
 
-personal_data = {'api_key':nrel_api_key,
+"""personal_data = {'api_key':nrel_api_key,
                  'name':'Samuel+G+Dotson',
                  'reason':'Research',
                  'affiliation':'Union+of+Concerned+Scientists',
                  'email':'sdotson@ucsusa.org',
-                 'mailing_list':'false'}
+                 'mailing_list':'false'}"""
 
 parameters = {'lon':40.09,
               'lat':-88.26,

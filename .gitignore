@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 
 # data folders that are too large to keep with the reports
-/data/spatial-data/Electric_Retail_Service_Territories
-/data/transmission_lines/Electric__Power_Transmission_Lines
+Electric_Retail_Service_Territories
+Electric__Power_Transmission_Lines

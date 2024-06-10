@@ -1,4 +1,4 @@
-name: pypsa-illinois
+name: pypsa-illinois-test
 channels:
     - conda-forge
     - bioconda
@@ -30,7 +30,7 @@ dependencies:
     - cartopy
     - descartes
     - lxml
-    - snakemake-minimal
+    - snakemake
     - pycountry
     - yaml
     - geopy
@@ -47,3 +47,4 @@ dependencies:
       - us
       - census
       - streamlit
+      - vresutils

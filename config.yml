@@ -1,0 +1,35 @@
+state_abbr: 'IL'
+
+atb_params:
+    atb_year: 2023  # the ATB publication year
+    case: 'Market'  # 'R&D'
+    scenario: 'Moderate'  # 'Conservative', 'Advanced'
+    cost_recovery_period: 20  # 30
+    
+    carrier: [
+                'Biopower',
+                # 'CSP',  # Concentrated solar power
+                'Coal_FE',  
+                # 'CommPV',
+                # 'DistributedWind',
+                # 'Geothermal',
+                # 'Hydropower',
+                'LandbasedWind',
+                'NaturalGas_FE',
+                # 'Nuclear',
+                # 'OffShoreWind',
+                # 'Pumped Storage Hydropower',
+                # 'ResPV',
+                # 'Utility-Scale PV-Plus-Battery',
+                'UtilityPV',
+                # 'Commercial Battery Storage',
+                # 'Residential Battery Storage',
+                'Utility-Scale Battery Storage'
+                ]
+    technology: [
+      'NG F-Frame CC',
+      'NG F-Frame CT',
+      'Coal-IGCC',
+      'Utility PV - Class 8',  # these data are identical for all classes
+      'Land-Based Wind - Class 6' # these data are identical for all classes
+    ]

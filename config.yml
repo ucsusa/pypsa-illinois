@@ -1,5 +1,10 @@
 state_abbr: 'IL'
 
+geo_res: 'rto'  # accepts: 'rto' or 'county'
+
+rto_subba: ['0004','CE']  # MISO-Z4, ComEd
+region_names: ['MISO-Z4','ComEd']
+
 atb_params:
     atb_year: 2022  # the ATB publication year
     case: 'Market'  # 'R&D'

@@ -34,21 +34,31 @@ if __name__ == "__main__":
                                 
     # add natural gas and coal costs                            
 
-    url = "https://www.eia.gov/electricity/annual/html/epa_07_04.html"
-    fuel_prices = pd.read_html(url)[1].set_index(pd.Series(range(2012,2023))).T
+    prices_url = "https://www.eia.gov/electricity/annual/html/epa_07_04.html"
+    fuel_prices = pd.read_html(prices_url)[1].set_index(pd.Series(range(2012,2023))).T
+
+    heatrate_url = "https://www.eia.gov/electricity/annual/html/epa_08_01.html"
+    heatrates = pd.read_html(heatrate_url)[1].set_index("Year")
+
+    price_col = 'Average Cost (Dollars per MMBtu)'
 
     coal_price = fuel_prices.loc[('Coal',
-                                  'Bituminous',
-                                  'Average Cost (Dollars per MMBtu)'),
+                                  'Subbituminous',
+                                  price_col),
                                  atb_params['atb_year']]
                                 
     naturalgas_price = fuel_prices.loc[('Natural Gas',
-                                  slice(None), 
-                                  'Average Cost (Dollars per MMBtu)'),
-                                 2022].values[0]
+                                        slice(None), 
+                                        price_col),
+                                        atb_params['atb_year']].values[0]
+    petroleum_price = fuel_prices.loc[('Petroleum',
+                                       slice(None),
+                                       price_col),
+                                       atb_params['atb_year']].values[0]
     
-    ng_heatrate = snakemake.config['tech_params']['natural_gas']['heat_rate']
-    coal_heatrate = snakemake.config['tech_params']['coal']['heat_rate']
+    ng_heatrate = heatrates.at[atb_params['atb_year'], 'Natural Gas']/1e3
+    coal_heatrate = heatrates.at[atb_params['atb_year'], 'Coal']/1e3
+    petroleum_heatrate = heatrates.at[atb_params['atb_year'], 'Petroleum']/1e3
     
     df_pivot.loc[('Natural Gas',
                   slice(None),
@@ -57,6 +67,13 @@ if __name__ == "__main__":
     df_pivot.loc[('Coal',
                   slice(None),
                   slice(None)), 
-                 'Fuel'] = naturalgas_price*ng_heatrate
+                 'Fuel'] = coal_price*coal_heatrate
+    # add petroleum
+    df_t = df_pivot.T
+    df_t['Petroleum','IC',2021] = [1158, 
+                                   27.94, 
+                                   1.78, 
+                                   petroleum_price*petroleum_heatrate]   # from here https://www.eia.gov/electricity/generatorcosts/
+    df_pivot = df_t.T
     
     df_pivot.to_csv(snakemake.output.costs)

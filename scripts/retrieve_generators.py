@@ -88,6 +88,13 @@ if __name__ == "__main__":
     data = response['data']
     
     df = pd.DataFrame(data)
+    df.drop(columns=['stateName','sector','sectorName','entityid',
+                     'balancing-authority-name','statusDescription', 
+                     'entityName','nameplate-capacity-mw-units',
+                     'energy_source_code','generatorid','status',
+                     'unit'
+                     ],
+            inplace=True)
     
     locations = gpd.points_from_xy(x=df['longitude'], y=df['latitude'], crs='EPSG:4326')
     
@@ -95,4 +102,17 @@ if __name__ == "__main__":
     
     gdf['nameplate-capacity-mw'] = gdf['nameplate-capacity-mw'].astype('float')
     
-    gdf.to_csv(str(curr_dir_os/"../data/illinois_power_plants.csv"))
+    gdf['balancing_authority_code'] = gdf['balancing_authority_code'].replace({"MISO":"MISO-Z4",'PJM':"ComEd"})
+    
+    gdf.to_csv(snakemake.output.generators)
+    
+    scale = snakemake.config['geo_res']
+    idx_opts = {"rto":"balancing_authority_code",
+                "county":"county"}
+    
+    gen_agg = gdf.pivot_table(index=idx_opts[scale],
+                                columns='technology',
+                                values='nameplate-capacity-mw',
+                                aggfunc='sum')
+    
+    gen_agg.to_csv(snakemake.output.aggregated)

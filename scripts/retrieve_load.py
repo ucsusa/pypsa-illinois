@@ -8,7 +8,7 @@ from pathlib import Path
 
 curr_dir_os = Path(os.path.dirname(os.path.abspath(__file__)))
 
-load_dotenv("../.env")
+# load_dotenv("../.env")
 
 if __name__ == "__main__":
     
@@ -29,6 +29,11 @@ if __name__ == "__main__":
                 facets=facets,
                 n_workers=4,
                 verbose=True)
+    
+    try:
+        demand['Interval End'] = demand['Interval End'].dt.tz_localize(None)
+    except:
+        pass
     
     demand.MW = demand.MW.astype("float")
     

@@ -1,35 +1,43 @@
 state_abbr: 'IL'
 
 atb_params:
-    atb_year: 2023  # the ATB publication year
+    atb_year: 2022  # the ATB publication year
     case: 'Market'  # 'R&D'
     scenario: 'Moderate'  # 'Conservative', 'Advanced'
-    cost_recovery_period: 20  # 30
-    
+    crp: 20  # 30
     carrier: [
-                'Biopower',
-                # 'CSP',  # Concentrated solar power
-                'Coal_FE',  
-                # 'CommPV',
-                # 'DistributedWind',
-                # 'Geothermal',
-                # 'Hydropower',
-                'LandbasedWind',
-                'NaturalGas_FE',
-                # 'Nuclear',
-                # 'OffShoreWind',
-                # 'Pumped Storage Hydropower',
-                # 'ResPV',
-                # 'Utility-Scale PV-Plus-Battery',
-                'UtilityPV',
-                # 'Commercial Battery Storage',
-                # 'Residential Battery Storage',
-                'Utility-Scale Battery Storage'
-                ]
-    technology: [
-      'NG F-Frame CC',
-      'NG F-Frame CT',
-      'Coal-IGCC',
-      'Utility PV - Class 8',  # these data are identical for all classes
-      'Land-Based Wind - Class 6' # these data are identical for all classes
+      "Natural Gas",
+      "Biopower",
+      "Land-Based Wind",
+      "Utility PV",
+      "Coal",
+      "Utility-Scale Battery Storage",
+      "Nuclear"
     ]
+    technology: [
+      'CCAvgCF', 
+      'CTAvgCF', 
+      'Dedicated', 
+      'Class1', 
+      'IGCCAvgCF', 
+      'Nuclear',
+      'NuclearSMR', 
+      '10Hr Battery Storage', 
+      '8Hr Battery Storage',
+      '6Hr Battery Storage', 
+      '4Hr Battery Storage', 
+      '2Hr Battery Storage'
+      ]
+
+tech_params:
+    coal:
+      heat_rate: 10.026
+
+    natural_gas:
+      heat_rate: 10.295 
+
+
+lines:  # this is an assumption
+  v_nom: 400.
+  s_nom: 0.
+  s_nom_extendable: True

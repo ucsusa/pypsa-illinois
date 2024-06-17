@@ -21,5 +21,11 @@ if __name__ == "__main__":
         gdf['name'] = ['MISO-Z4','ComEd']
         gdf = gdf.set_index('name')
         
-    gdf.to_file("data/spatial_data/supply_regions.shp")
         
+    centroids = gdf.to_crs(epsg=5070).centroid.to_crs(epsg=4326)
+    gdf['x'] = centroids.x
+    gdf['y'] = centroids.y
+        
+    gdf.to_file("data/spatial_data/supply_regions.shp")
+    
+    

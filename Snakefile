@@ -2,7 +2,28 @@ configfile: "config.yml"
 
 from pathlib import Path
 env_file = Path("./.env").resolve()
+from dotenv import load_dotenv
+load_dotenv(str(env_file))
 
 rule retrieve_supply_regions:
-    output: "data/spatial_data/supply_regions.shp"
+    output: 
+        supply_regions = "data/spatial_data/supply_regions.shp"
     script: "scripts/retrieve_supply_regions.py"
+
+rule retrieve_costs:
+    output: 
+        costs = "data/technology_costs.csv"
+    script: "scripts/retrieve_costs.py"
+
+rule retrieve_load_data:
+    output:
+        load = "data/time_series/load.csv"
+    script: "scripts/retrieve_load.py"
+
+rule build_topology:
+    input: 
+        supply_regions = "data/spatial_data/supply_regions.shp"
+    output:
+        buses = "data/buses.csv",   
+        lines = "data/lines.csv"
+    script: "scripts/build_topology.py"

@@ -27,10 +27,12 @@ rule retrieve_existing_generators:
     script: "scripts/retrieve_generators.py"
 
 rule retrieve_renewable_resources:
+    input:
+        supply_regions = "data/spatial_data/supply_regions.shp"
     output:
-        wind = "data/time_series/wind.csv"
+        wind = "data/time_series/wind.csv",
         solar = "data/time_series/solar.csv"
-    script: "retrieve_renewables.py"
+    script: "scripts/retrieve_renewables.py"
 
 rule build_topology:
     input: 

@@ -2,6 +2,11 @@ state_abbr: 'IL'
 
 geo_res: 'rto'  # accepts: 'rto' or 'county'
 
+model_year: 2025
+
+solar_year: 2019  # NSRDB only accepts years 1998-2020
+wind_year: 2011  # WTK only goes from 2009-2013
+
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']
 
@@ -33,15 +38,7 @@ atb_params:
       '4Hr Battery Storage', 
       '2Hr Battery Storage'
       ]
-
-tech_params:
-    coal:
-      heat_rate: 10.026
-
-    natural_gas:
-      heat_rate: 10.295 
-
-
+      
 lines:  # this is an assumption
   v_nom: 400.
   s_nom: 0.

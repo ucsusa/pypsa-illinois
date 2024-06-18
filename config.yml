@@ -6,6 +6,7 @@ model_year: 2025
 
 solar_year: 2019  # NSRDB only accepts years 1998-2020
 wind_year: 2011  # WTK only goes from 2009-2013
+load_year: 2019
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']
@@ -38,8 +39,17 @@ atb_params:
       '4Hr Battery Storage', 
       '2Hr Battery Storage'
       ]
-      
+
 lines:  # this is an assumption
   v_nom: 400.
   s_nom: 0.
   s_nom_extendable: True
+
+
+turbine_params:
+  cut_in: 3.0  # m/s
+  cut_out: 25.0  # m/s
+  rated: 13.0  # m/s
+  diameter: 103 # m
+  rated_power: 2.75  # MW
+  air_density: 1.225  # kg/m^3

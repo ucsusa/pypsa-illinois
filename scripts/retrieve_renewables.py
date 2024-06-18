@@ -1,17 +1,14 @@
 import numpy as np
 import sys
-import os
 import pandas as pd
-import matplotlib.pyplot as plt
-from us import states
 import geopandas as gpd
-from shapely import Point
-from pathlib import Path
 from tqdm import tqdm
+from unyt import m, s, MW, W, kg
 
 sys.path.append("functions")
 
 from nrel_data_api import parameters, make_csv_url
+
 
 def handle_datetime(dataframe):
     """
@@ -35,7 +32,6 @@ def handle_datetime(dataframe):
         raise ValueError
     
     return frame
-    
     
 
 def retrieve_solar_timeseries(region):
@@ -65,6 +61,7 @@ def retrieve_solar_timeseries(region):
     solar_df = pd.concat(frames, axis=1)
     
     return solar_df
+
 
 def retrieve_wind_timeseries(region):
     """
@@ -96,13 +93,98 @@ def retrieve_wind_timeseries(region):
     return wind_df
 
 
+def turbine_power(v):
+    """
+    Calculates the power output of a wind turbine.
+    
+    Parameters
+    ----------
+    v : float
+        Wind speed in meters per second (m/s).
+    Returns
+    -------
+    power : float
+        Power in megawatts (MW).
+    """
+    turbine_params = snakemake.config['turbine_params']
+    
+    cut_in = float(turbine_params['cut_in'])*m/s
+    cut_out = float(turbine_params['cut_out'])*m/s
+    rated = float(turbine_params['rated'])*m/s
+    diameter = float(turbine_params['diameter'])*m
+    rated_power = float(turbine_params['rated_power'])*MW
+    air_density = float(turbine_params['air_density'])*kg/m**3
+    
+    
+    power = lambda v: np.min((((0.5*np.pi/4)*(air_density*diameter**2)*v**3).to(MW), 
+                              rated_power))*MW
+    
+    wind_speed = v*m/s
+    
+    if wind_speed < cut_in:
+        return 0*MW
+    elif (wind_speed > rated) and (wind_speed < cut_out):
+        return rated_power
+    elif wind_speed >= cut_out:
+        return 0*MW
+    elif wind_speed >= cut_in:
+        return power(wind_speed)
+
+
+def process_wind_timeseries(df, normalize=True):
+    """
+    Converts windspeed (m/s) timeseries data to a 
+    hypothetical power production given some wind turbine
+    parameters (specified in `config.yml`).
+
+    Parameters
+    ----------
+    df : :class:pd.DataFrame
+        A pandas dataframe with a column of windspeed data
+        in (m/s).
+    normalize : boolean
+        Whether the data should be normalized. Default is true.
+    """
+    frame = df.copy()
+    
+    for col in frame.columns:
+        frame[col] = frame[col].apply(turbine_power)
+        
+    
+    if normalize:
+        frame = frame.divide(frame.max(axis=0), axis=1)
+    
+    return frame 
+    
+    
+def process_solar_timeseries(df, normalize=True):
+    """
+    Converts solar radiation timeseries to a
+    hypothetical power production.
+
+    Parameters
+    ----------
+    df : _type_
+        _description_
+    normalize : bool, optional
+        Whether the data should be normalized. Default is true.
+    """
+    frame = df.copy()
+    if normalize:
+            frame = frame.divide(frame.max(axis=0), axis=1)
+        
+    return frame 
+
 if __name__ == "__main__":
     
     regions = gpd.read_file(snakemake.input.supply_regions)
     
+    # solar data
     df = retrieve_solar_timeseries(regions)
-    
+    df = process_solar_timeseries(df)
     df.to_csv(snakemake.output.solar)
     
+    # wind data
     df = retrieve_wind_timeseries(regions)
+    df = process_wind_timeseries(df)
     df.to_csv(snakemake.output.wind)

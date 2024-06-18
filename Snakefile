@@ -26,7 +26,7 @@ rule retrieve_existing_generators:
         aggregated = "data/aggregated_generators.csv"
     script: "scripts/retrieve_generators.py"
 
-rule retrieve_renewable_resources:
+rule retrieve_renewable_profiles:
     input:
         supply_regions = "data/spatial_data/supply_regions.shp"
     output:

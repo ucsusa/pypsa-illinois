@@ -8,6 +8,17 @@ if __name__ == "__main__":
     atb = ATBe(atb_params['atb_year'])
     df = atb.raw_dataframe
 
+    df['technology_alias'] = df['technology_alias'].replace({"Utility-Scale Battery Storage":"Batteries",
+                                                             "Biopower":"Biomass",
+                                                             "Land-Based Wind":"Wind",
+                                                             "Utility PV":"Solar"})
+
+
+    df['techdetail'] = df['techdetail'].replace({'Nuclear':'LWR',
+                                                 'Class1':'Land-Based Wind',
+                                                 'Class2':'Utility PV',
+                                                 'Dedicated':'Biopower'})
+
     df_pivot = df.pivot_table(index=['scenario',
                                     'core_metric_case',
                                     'crpyears',
@@ -23,7 +34,6 @@ if __name__ == "__main__":
                             slice(None),
                             slice(None)
                             ))
-    
     df_pivot = df_pivot.loc[(atb_params['carrier'],
                              atb_params['technology'] ,
                              slice(None)), 
@@ -32,6 +42,10 @@ if __name__ == "__main__":
                                 .dropna(axis=0, how='all')\
                                 .drop_duplicates(keep='first')
                                 
+    df_pivot.rename(columns={'Fixed O&M':'FOM',
+                             'Variable O&M':'VOM',
+                             },
+                    inplace=True)
     # add natural gas and coal costs                            
 
     prices_url = "https://www.eia.gov/electricity/annual/html/epa_07_04.html"
@@ -56,7 +70,7 @@ if __name__ == "__main__":
                                        price_col),
                                        atb_params['atb_year']].values[0]
     
-    ng_heatrate = heatrates.at[atb_params['atb_year'], 'Natural Gas']/1e3
+    ng_heatrate = heatrates.at[atb_params['atb_year'], 'Natural Gas']/1e3  # converts kwh/btu to mwh/mmbtu
     coal_heatrate = heatrates.at[atb_params['atb_year'], 'Coal']/1e3
     petroleum_heatrate = heatrates.at[atb_params['atb_year'], 'Petroleum']/1e3
     
@@ -70,10 +84,14 @@ if __name__ == "__main__":
                  'Fuel'] = coal_price*coal_heatrate
     # add petroleum
     df_t = df_pivot.T
-    df_t['Petroleum','IC',2021] = [1158, 
+    
+    # these costs are from 2021 and should be updated to reflect inflation.
+    df_t['Petroleum','Petroleum',snakemake.config['model_year']] = [1158, 
                                    27.94, 
                                    1.78, 
                                    petroleum_price*petroleum_heatrate]   # from here https://www.eia.gov/electricity/generatorcosts/
     df_pivot = df_t.T
+    
+    df_pivot.fillna(0., inplace=True)
     
     df_pivot.to_csv(snakemake.output.costs)

@@ -37,8 +37,8 @@ DATASET_CONFIG = {
     },
 }
 
-start_str = "2024-01"
-end_str = "2024-04"
+start_str = "2024-03"
+end_str = "2024-03"
 frequency= 'monthly'
 facets = {
         #   'balancing_authority_code':['SWPP'],
@@ -96,6 +96,26 @@ if __name__ == "__main__":
                      ],
             inplace=True)
     
+    df.replace(['Natural Gas Fired Combustion Turbine',
+              'Natural Gas Steam Turbine',
+              'Natural Gas Internal Combustion Engine', 
+              'Landfill Gas',
+              'Other Waste Biomass',
+              'Other Gases'], 
+            "CTAvgCF",
+            inplace=True)
+
+    df.replace({'Conventional Hydroelectric':'Hydro',
+                'Onshore Wind Turbine':'Land-Based Wind',
+                'Conventional Steam Coal':'IGCCAvgCF',
+                'Petroleum Liquids':'Petroleum',
+                'Natural Gas Fired Combined Cycle':'CCAvgCF',
+                'Solar Photovoltaic':'Utility PV',
+                'Batteries':'4Hr Battery Storage',
+                'Nuclear':'LWR',       
+                },
+                inplace=True)
+        
     locations = gpd.points_from_xy(x=df['longitude'], y=df['latitude'], crs='EPSG:4326')
     
     gdf = gpd.GeoDataFrame(df, geometry=locations)
@@ -115,4 +135,6 @@ if __name__ == "__main__":
                                 values='nameplate-capacity-mw',
                                 aggfunc='sum')
     
+    gen_agg.drop(columns=['All Other','Hydro'], inplace=True)
+
     gen_agg.to_csv(snakemake.output.aggregated)

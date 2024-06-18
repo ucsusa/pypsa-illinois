@@ -42,11 +42,33 @@ rule build_topology:
         lines = "data/lines.csv"
     script: "scripts/build_topology.py"
 
-# rule add_electricity:
-#     input:
-#         supply_regions = "data/spatial_data/supply_regions.shp",
-#         load = "data/time_series/load.csv",
-#         generators = "data/aggregated_generators.csv",
-#         costs = "data/technology_costs.csv"
-#     output:
+rule build_base_network:
+    input: 
+        buses='data/buses.csv',
+        lines='data/lines.csv'
+    output: 
+        network="data/networks/base_network.nc"
+    script: "scripts/build_base_network.py"
 
+rule add_electricity:
+    input:
+        supply_regions = "data/spatial_data/supply_regions.shp",
+        load = "data/time_series/load.csv",
+        generators = "data/aggregated_generators.csv",
+        costs = "data/technology_costs.csv",
+        wind_profile = "data/time_series/wind.csv",
+        solar_profile = "data/time_series/solar.csv",
+        base_network = "data/networks/base_network.nc"
+    output:
+        elec_network = "data/networks/electricity_network.nc",
+        final_costs = "data/final_costs.csv"
+    script: "scripts/add_electricity.py"
+
+
+rule solve_network:
+    input:
+        elec_network = "data/networks/electricity_network.nc"
+    output:
+        solved_network = "results/networks/illinois_solved.nc",
+        dispatch_figure = "results/figures/illinois_dispatch.png"
+    script: "scripts/solve_network.py"

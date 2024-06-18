@@ -18,10 +18,15 @@ def build_topology():
     line_config = snakemake.config['lines']
     v_nom = line_config['v_nom']
 
-    buses = (regions.assign(v_nom=v_nom).drop('geometry', axis=1))
+    buses = (regions.assign(v_nom=v_nom,
+                            carrier='AC').drop('geometry', axis=1))
+    
 
     # Lines from touching regions
     lines = pd.DataFrame([regions.index.values], columns=['bus0','bus1'])
+    lines = lines.assign(s_nom_extendable=bool(line_config['s_nom_extendable']),
+                 x = float(line_config['x']),
+                 r = float(line_config['r']))
 
     return buses, lines
 

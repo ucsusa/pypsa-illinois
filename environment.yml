@@ -1,4 +1,4 @@
-name: pypsa-illinois-test
+name: pypsa-illinois
 channels:
     - conda-forge
     - bioconda

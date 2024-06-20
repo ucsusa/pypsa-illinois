@@ -124,11 +124,12 @@ def attach_generators(n, costs, generators):
                 
             # renewables
             if carrier == 'Wind':
-                p_max_pu = wind_profile[bus]
+                p_max_pu = p_min_pu = wind_profile[bus]
             elif carrier == 'Solar':
-                p_max_pu = solar_profile[bus]
+                p_max_pu = p_min_pu = solar_profile[bus]
             else:
                 p_max_pu = 1
+                p_min_pu = 0
                 
             extendable = tech in snakemake.config['extendable_techs']
 
@@ -137,6 +138,7 @@ def attach_generators(n, costs, generators):
                   bus=bus,
                   p_nom=p_nom,
                   p_nom_min=p_nom,
+                  p_min_pu=p_min_pu,
                   p_max_pu=p_max_pu,
                   p_nom_extendable=extendable,
                   carrier=carrier,

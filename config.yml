@@ -69,13 +69,29 @@ turbine_params:
   rated_power: 2.75  # MW
   air_density: 1.225  # kg/m^3
 
+# extendable_techs:  [
+#       'CCAvgCF', 
+#       'CTAvgCF', 
+#       'Biopower', 
+#       'Land-Based Wind',
+#       'Utility PV', 
+#       'IGCCAvgCF', 
+#       'LWR',
+#       'NuclearSMR', 
+#       '10Hr Battery Storage', 
+#       '8Hr Battery Storage',
+#       '6Hr Battery Storage', 
+#       '4Hr Battery Storage', 
+#       '2Hr Battery Storage'
+#       ]
+
 extendable_techs:  [
-      'CCAvgCF', 
-      'CTAvgCF', 
+      # 'CCAvgCF', 
+      # 'CTAvgCF', 
       'Biopower', 
       'Land-Based Wind',
       'Utility PV', 
-      'IGCCAvgCF', 
+      # 'IGCCAvgCF', 
       'LWR',
       'NuclearSMR', 
       '10Hr Battery Storage', 

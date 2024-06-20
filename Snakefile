@@ -5,6 +5,11 @@ env_file = Path("./.env").resolve()
 from dotenv import load_dotenv
 load_dotenv(str(env_file))
 
+rule targets:
+    input:
+        "results/figures/illinois_dispatch.png",
+        "results/networks/illinois_solved.nc"
+
 rule retrieve_supply_regions:
     output: 
         supply_regions = "data/spatial_data/supply_regions.shp"

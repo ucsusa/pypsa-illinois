@@ -84,11 +84,11 @@ def attach_generators(n, costs, generators):
     snapshots = create_snapshots()
     wind_profile = pd.read_csv(snakemake.input.wind_profile, parse_dates=True, index_col=0)
     wind_profile.set_index(snapshots, inplace=True)
-    wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").sum()
+    wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean()
     
     solar_profile = pd.read_csv(snakemake.input.solar_profile, parse_dates=True, index_col=0)
     solar_profile.set_index(snapshots, inplace=True)
-    solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").sum()
+    solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean()
     
     # add carriers
     for carrier in available_carriers:
@@ -136,6 +136,7 @@ def attach_generators(n, costs, generators):
                   name=f"{bus} {tech}",
                   bus=bus,
                   p_nom=p_nom,
+                  p_nom_min=p_nom,
                   p_max_pu=p_max_pu,
                   p_nom_extendable=extendable,
                   carrier=carrier,

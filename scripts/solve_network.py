@@ -34,6 +34,7 @@ def plot_dispatch(n, time="2025-07"):
     ax.legend(loc=(1.05, 0))
     ax.set_ylabel("GW")
     ax.set_ylim(n.generators_t.p.min().min(), n.loads_t.p_set.sum(axis=1).max()/1e3+2.5)
+    plt.tight_layout()
     
     return fig, ax
 

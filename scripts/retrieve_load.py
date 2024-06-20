@@ -13,7 +13,6 @@ curr_dir_os = Path(os.path.dirname(os.path.abspath(__file__)))
 if __name__ == "__main__":
     
     eia = EIA()
-    breakpoint()
     route = "electricity/rto/region-sub-ba-data"
     
     start_date = '2019-01-01'
@@ -29,8 +28,7 @@ if __name__ == "__main__":
                 facets=facets,
                 n_workers=4,
                 verbose=True)
-    
-    breakpoint()
+
     try:
         demand['Interval End'] = demand['Interval End'].dt.tz_localize(None)
     except:
@@ -42,6 +40,8 @@ if __name__ == "__main__":
                    columns='Subregion',
                    values='MW')
     
+    demand_pivot[demand_pivot>60e3] = np.nan
+    demand_pivot = demand_pivot.interpolate("linear")
     
     demand_pivot.rename(columns=dict(zip(snakemake.config['rto_subba'],
                                          snakemake.config['region_names'])),

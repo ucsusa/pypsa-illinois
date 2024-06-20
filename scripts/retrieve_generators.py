@@ -42,7 +42,7 @@ end_str = "2024-03"
 frequency= 'monthly'
 facets = {
         #   'balancing_authority_code':['SWPP'],
-          'stateid':['IL'],
+          'stateid':[snakemake.config['state_abbr']],
           'status':['OP','SB','OA']
           }
 

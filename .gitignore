@@ -164,3 +164,10 @@ Electric_Retail_Service_Territories
 Electric__Power_Transmission_Lines
 
 .snakemake
+
+data/*.csv
+time_series
+spatial_data
+networks
+
+results

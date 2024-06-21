@@ -8,19 +8,18 @@ from dotenv import load_dotenv
 
 load_dotenv("../.env")
 
-nrel_api_key = os.environ.get('NREL_API_KEY')
-
-"""personal_data = {'api_key':nrel_api_key,
-                 'name':'Samuel+G+Dotson',
-                 'reason':'Research',
-                 'affiliation':'Union+of+Concerned+Scientists',
-                 'email':'sdotson@ucsusa.org',
-                 'mailing_list':'false'}"""
+personal_data = {'api_key':os.environ.get('NREL_API_KEY'),
+                 'name':os.environ.get('NAME').replace(' ', '+'),
+                 'reason':os.environ.get('REASON').replace(' ', '+'),
+                 'affiliation':os.environ.get('AFFIL').replace(' ', '+'),
+                 'email':os.environ.get('EMAIL'),
+                 'mailing_list':os.environ.get('MAILING_LIST')
+                 }
 
 parameters = {'lon':40.09,
               'lat':-88.26,
               'year':2019,
-              'leap_day':'true',
+              'leap_day':'false',
               'selector':'POINT',
               'utc':'false',
               'interval':'60',
@@ -66,7 +65,7 @@ def make_wkt(selector, lat, lon):
     return wkt
 
 
-def make_csv_url(parameters, personal_data, kind='solar'):
+def make_csv_url(parameters, personal_data=personal_data, kind='solar'):
     """
     This function generates a url to access renewable energy
     data through the NREL API. This function requires your

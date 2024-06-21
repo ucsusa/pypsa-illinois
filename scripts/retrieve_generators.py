@@ -37,12 +37,12 @@ DATASET_CONFIG = {
     },
 }
 
-start_str = "2024-01"
-end_str = "2024-04"
+start_str = "2024-03"
+end_str = "2024-03"
 frequency= 'monthly'
 facets = {
         #   'balancing_authority_code':['SWPP'],
-          'stateid':['IL'],
+          'stateid':[snakemake.config['state_abbr']],
           'status':['OP','SB','OA']
           }
 
@@ -88,11 +88,53 @@ if __name__ == "__main__":
     data = response['data']
     
     df = pd.DataFrame(data)
+    df.drop(columns=['stateName','sector','sectorName','entityid',
+                     'balancing-authority-name','statusDescription', 
+                     'entityName','nameplate-capacity-mw-units',
+                     'energy_source_code','generatorid','status',
+                     'unit'
+                     ],
+            inplace=True)
     
+    df.replace(['Natural Gas Fired Combustion Turbine',
+              'Natural Gas Steam Turbine',
+              'Natural Gas Internal Combustion Engine', 
+              'Landfill Gas',
+              'Other Waste Biomass',
+              'Other Gases'], 
+            "CTAvgCF",
+            inplace=True)
+
+    df.replace({'Conventional Hydroelectric':'Hydro',
+                'Onshore Wind Turbine':'Land-Based Wind',
+                'Conventional Steam Coal':'IGCCAvgCF',
+                'Petroleum Liquids':'Petroleum',
+                'Natural Gas Fired Combined Cycle':'CCAvgCF',
+                'Solar Photovoltaic':'Utility PV',
+                'Batteries':'4Hr Battery Storage',
+                'Nuclear':'LWR',       
+                },
+                inplace=True)
+        
     locations = gpd.points_from_xy(x=df['longitude'], y=df['latitude'], crs='EPSG:4326')
     
     gdf = gpd.GeoDataFrame(df, geometry=locations)
     
     gdf['nameplate-capacity-mw'] = gdf['nameplate-capacity-mw'].astype('float')
     
-    gdf.to_csv(str(curr_dir_os/"../data/illinois_power_plants.csv"))
+    gdf['balancing_authority_code'] = gdf['balancing_authority_code'].replace({"MISO":"MISO-Z4",'PJM':"ComEd"})
+    
+    gdf.to_csv(snakemake.output.generators)
+    
+    scale = snakemake.config['geo_res']
+    idx_opts = {"rto":"balancing_authority_code",
+                "county":"county"}
+    
+    gen_agg = gdf.pivot_table(index=idx_opts[scale],
+                                columns='technology',
+                                values='nameplate-capacity-mw',
+                                aggfunc='sum')
+    
+    gen_agg.drop(columns=['All Other','Hydro'], inplace=True)
+
+    gen_agg.to_csv(snakemake.output.aggregated)

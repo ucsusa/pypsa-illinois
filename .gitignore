@@ -162,3 +162,5 @@ cython_debug/
 # data folders that are too large to keep with the reports
 Electric_Retail_Service_Territories
 Electric__Power_Transmission_Lines
+
+.snakemake

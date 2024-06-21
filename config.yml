@@ -1,0 +1,112 @@
+state_abbr: 'IL'
+
+geo_res: 'rto'  # accepts: 'rto' or 'county'
+time_res: 4  # hours 
+
+model_year: 2025
+
+solar_year: 2019  # NSRDB only accepts years 1998-2020
+wind_year: 2011  # WTK only goes from 2009-2013
+load_year: 2019
+
+rto_subba: ['0004','CE']  # MISO-Z4, ComEd
+region_names: ['MISO-Z4','ComEd']
+
+discount_rate: 0.07
+
+lifetime:
+  Nuclear: 80
+  Biomass: 40
+  Natural Gas: 40
+  Coal: 40
+  Solar: 20
+  Wind: 20
+  Batteries: 15
+
+atb_params:
+    atb_year: 2022  # the ATB publication year
+    case: 'Market'  # 'R&D'
+    scenario: 'Moderate'  # 'Conservative', 'Advanced'
+    crp: 20  # 30
+    carrier: [
+      "Natural Gas",
+      "Biomass",
+      "Wind",
+      "Solar",
+      "Coal",
+      "Batteries",
+      "Nuclear"
+    ]
+    technology: [
+      'CCAvgCF', 
+      'CTAvgCF', 
+      'Biopower', 
+      'Land-Based Wind',
+      'Utility PV', 
+      'IGCCAvgCF', 
+      'LWR',
+      'NuclearSMR', 
+      '10Hr Battery Storage', 
+      '8Hr Battery Storage',
+      '6Hr Battery Storage', 
+      '4Hr Battery Storage', 
+      '2Hr Battery Storage'
+      ]
+
+lines:  # this is an assumption
+  v_nom: 400.
+  s_nom: 0.
+  x: 1  # reactance
+  r: 1  # resistance
+  s_nom_extendable: True
+
+
+turbine_params:
+  cut_in: 3.0  # m/s
+  cut_out: 25.0  # m/s
+  rated: 13.0  # m/s
+  diameter: 103 # m
+  rated_power: 2.75  # MW
+  air_density: 1.225  # kg/m^3
+
+# extendable_techs:  [
+#       'CCAvgCF', 
+#       'CTAvgCF', 
+#       'Biopower', 
+#       'Land-Based Wind',
+#       'Utility PV', 
+#       'IGCCAvgCF', 
+#       'LWR',
+#       'NuclearSMR', 
+#       '10Hr Battery Storage', 
+#       '8Hr Battery Storage',
+#       '6Hr Battery Storage', 
+#       '4Hr Battery Storage', 
+#       '2Hr Battery Storage'
+#       ]
+
+extendable_techs:  [
+      # 'CCAvgCF', 
+      # 'CTAvgCF', 
+      'Biopower', 
+      'Land-Based Wind',
+      'Utility PV', 
+      # 'IGCCAvgCF', 
+      'LWR',
+      'NuclearSMR', 
+      '10Hr Battery Storage', 
+      '8Hr Battery Storage',
+      '6Hr Battery Storage', 
+      '4Hr Battery Storage', 
+      '2Hr Battery Storage'
+      ]
+
+carrier_colors:
+      Natural Gas: "orange"
+      Biomass: "green"
+      Wind: "aqua"
+      Solar: "yellow"
+      Coal: "brown"
+      Batteries: "grey"
+      Nuclear: "magenta"
+      Petroleum: "black"

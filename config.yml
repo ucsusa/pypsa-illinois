@@ -88,17 +88,17 @@ turbine_params:
 extendable_techs:  [
       # 'CCAvgCF', 
       # 'CTAvgCF', 
-      'Biopower', 
-      'Land-Based Wind',
-      'Utility PV', 
+      # 'Biopower', 
+      # 'Land-Based Wind',
+      # 'Utility PV', 
       # 'IGCCAvgCF', 
-      'LWR',
-      'NuclearSMR', 
-      '10Hr Battery Storage', 
-      '8Hr Battery Storage',
-      '6Hr Battery Storage', 
-      '4Hr Battery Storage', 
-      '2Hr Battery Storage'
+      # 'LWR',
+      # 'NuclearSMR', 
+      # '10Hr Battery Storage', 
+      # '8Hr Battery Storage',
+      # '6Hr Battery Storage', 
+      # '4Hr Battery Storage', 
+      # '2Hr Battery Storage'
       ]
 
 carrier_colors:

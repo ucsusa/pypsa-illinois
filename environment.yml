@@ -40,7 +40,7 @@ dependencies:
     - pytz
     - camelot-py
     - pip:
-      - gridstatus
+      - git+https://github.com/kmax12/gridstatus.git
       - python-dotenv
       - highspy
       - nrelpy

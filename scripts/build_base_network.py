@@ -14,11 +14,14 @@ def base_network():
     line_config = snakemake.config['lines']
     v_nom = line_config['v_nom']
 
+    resolution = int(snakemake.config['time_res'])
     model_year = snakemake.config['model_year']
     n.set_snapshots(pd.date_range(start=f"{model_year}-01-01", 
                                   end=f"{model_year+1}-01-01", 
                                   inclusive='left',
-                                  freq=f"{snakemake.config['time_res']}h"))
+                                  freq=f"{resolution}h"))
+    
+    n.snapshot_weightings.loc[:,:] = resolution
     n.import_components_from_dataframe(buses, 'Bus')
     n.import_components_from_dataframe(lines, 'Line')
     

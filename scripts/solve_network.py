@@ -5,6 +5,14 @@ import matplotlib.pyplot as plt
 
 def plot_dispatch(n, time="2025-07"):
     p_by_carrier = n.generators_t.p.groupby(n.generators.carrier, axis=1).sum().div(1e3)
+    
+    p_by_carrier = p_by_carrier[['Nuclear', 
+                                 'Coal', 
+                                 'Natural Gas', 
+                                 'Biomass', 
+                                 'Petroleum', 
+                                 'Solar',
+                                 'Wind']]
 
     if not n.storage_units.empty:
         sto = n.storage_units_t.p.T.groupby(n.storage_units.carrier).sum().T.div(1e3)

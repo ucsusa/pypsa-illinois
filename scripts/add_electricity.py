@@ -63,7 +63,7 @@ def attach_load(n):
     
     load.set_index(snapshots, inplace=True)
     
-    load = load.resample(f"{snakemake.config['time_res']}h").sum()
+    load = load.resample(f"{snakemake.config['time_res']}h").mean()
     
     print('Adding loads to model')
     for bus in tqdm(n.buses.index):

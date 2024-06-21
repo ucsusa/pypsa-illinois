@@ -40,7 +40,7 @@ if __name__ == "__main__":
                    columns='Subregion',
                    values='MW')
     
-    demand_pivot[demand_pivot>60e3] = np.nan
+    demand_pivot[demand_pivot>60e3] = np.nan # this should be replaced with a function to remove outliers. e.g., 2 SD away from mean.
     demand_pivot = demand_pivot.interpolate("linear")
     
     demand_pivot.rename(columns=dict(zip(snakemake.config['rto_subba'],

@@ -40,7 +40,18 @@ if __name__ == "__main__":
                    columns='Subregion',
                    values='MW')
     
-    demand_pivot[demand_pivot>60e3] = np.nan # this should be replaced with a function to remove outliers. e.g., 2 SD away from mean.
+        
+    # calculate outliers with IQR
+    # threshold = 20
+    # q1 = demand_pivot.quantile(0.05)
+    # q3 = demand_pivot.quantile(0.95)
+    # IQR = q3-q1
+    # upper = (q3+threshold*IQR)
+    # lower = (q1-threshold*IQR)
+    # demand_pivot = demand_pivot[~((demand_pivot<lower) | (demand_pivot>upper))]
+    
+    
+    demand_pivot[demand_pivot>float(snakemake.config['load_filter'])] = np.nan # this should be replaced with a function to remove outliers
     demand_pivot = demand_pivot.interpolate("linear")
     
     demand_pivot.rename(columns=dict(zip(snakemake.config['rto_subba'],

@@ -2,6 +2,7 @@ state_abbr: 'IL'
 
 geo_res: 'rto'  # accepts: 'rto' or 'county'
 time_res: 4  # hours 
+load_filter: 60e3  # MW, load above this level will be removed as outliers.
 
 model_year: 2025
 

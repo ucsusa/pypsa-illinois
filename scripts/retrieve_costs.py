@@ -86,7 +86,7 @@ if __name__ == "__main__":
     df_t = df_pivot.T
     
     # these costs are from 2021 and should be updated to reflect inflation.
-    df_t['Petroleum','Petroleum',snakemake.config['model_year']] = [1158, 
+    df_t['Petroleum','Petroleum',snakemake.config['model_years'][0]] = [1158, 
                                    27.94, 
                                    1.78, 
                                    petroleum_price*petroleum_heatrate]   # from here https://www.eia.gov/electricity/generatorcosts/

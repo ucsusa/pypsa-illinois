@@ -9,6 +9,7 @@ sys.path.append("functions")
 
 from nrel_data_api import parameters, make_csv_url
 
+model_years = np.array(snakemake.config['model_years']).astype('int')
 
 def handle_datetime(dataframe):
     """
@@ -21,10 +22,14 @@ def handle_datetime(dataframe):
         A pandas dataframe.
     """
     frame = dataframe.copy()
-    model_year = snakemake.config['model_year']
-    timestamps = pd.date_range(f"{model_year}-01-01",f"{model_year+1}-01-01",
-                               freq='1h', inclusive='left')
+    timestamps = pd.DatetimeIndex([])
+    for year in model_years:
+        period = pd.date_range(start=f"{year}-01-01",
+                                        freq=f"1h",
+                                        periods=8760)
+        timestamps = timestamps.append(period)
     
+    frame.index = timestamps
     try:
         frame.set_index(timestamps,inplace=True)
         frame.drop(columns=['Year','Month','Day','Hour','Minute'],inplace=True)
@@ -43,24 +48,32 @@ def retrieve_solar_timeseries(region):
     region : :class:`gpd.GeoDataFrame`
         A geopandas dataframe containing modeled bus regions.
     """
+   
     parameters['attr_list'] = ['ghi']
-    parameters['year'] = int(snakemake.config['solar_year'])
-    pbar = tqdm(region[['name','x','y']].values, position=0, leave=True)
-    frames = []
-    for n, i, j in pbar:
-        pbar.set_description(f"Processing {n}")
-        parameters['lon'] = i
-        parameters['lat'] = j
-        URL = make_csv_url(parameters=parameters, 
-                           kind='solar')
-        df = pd.read_csv(URL, skiprows=2)
-        df.rename(columns={'GHI':f"{n}"}, inplace=True)
-        df = handle_datetime(df)
-        frames.append(df)
+    outer_pbar = tqdm(snakemake.config['solar_years'], position=0, leave=True)
+    all_frames = []
+    for year in outer_pbar:
+        outer_pbar.set_description(f"Processing {year}")
+        parameters['year'] = int(year)
+        frames = []
+        inner_pbar = tqdm(region[['name','x','y']].values, position=1, leave=True)
+        for n, i, j in inner_pbar:
+            inner_pbar.set_description(f"Processing {n}")
+            parameters['lon'] = i
+            parameters['lat'] = j
+            URL = make_csv_url(parameters=parameters, 
+                            kind='solar')
+            df = pd.read_csv(URL, skiprows=2)[:8760]
+            df.rename(columns={'GHI':f"{n}"}, inplace=True)
+            frames.append(df)
     
-    solar_df = pd.concat(frames, axis=1)
+            solar_df = pd.concat(frames, axis=1)
     
-    return solar_df
+        all_frames.append(solar_df)
+    full_df = pd.concat(all_frames, axis=0)
+    full_df = handle_datetime(full_df)
+    
+    return full_df
 
 
 def retrieve_wind_timeseries(region):
@@ -74,23 +87,31 @@ def retrieve_wind_timeseries(region):
     """
     wind_attr = ['windspeed_80m']
     parameters['attr_list'] = wind_attr
-    parameters['year'] = int(snakemake.config['wind_year'])
-    pbar = tqdm(region[['name','x','y']].values, position=0, leave=True)
-    frames = []
-    for n, i, j in pbar:
-        pbar.set_description(f"Processing {n}")
-        parameters['lon'] = i
-        parameters['lat'] = j
-        URL = make_csv_url(parameters=parameters, 
-                           kind='wind')
-        df = pd.read_csv(URL, skiprows=1)
-        df.rename(columns={'wind speed at 80m (m/s)':f"{n}"}, inplace=True)
-        df = handle_datetime(df)
-        frames.append(df)
     
-    wind_df = pd.concat(frames, axis=1)
+    outer_pbar = tqdm(snakemake.config['wind_years'], leave=True, position=0)
+    all_frames = []
+    for year in outer_pbar:
+        outer_pbar.set_description(f"Processing {year}")
+        
+        parameters['year'] = int(year)
+        pbar = tqdm(region[['name','x','y']].values, position=1, leave=True)
+        frames = []
+        for n, i, j in pbar:
+            pbar.set_description(f"Processing {n}")
+            parameters['lon'] = i
+            parameters['lat'] = j
+            URL = make_csv_url(parameters=parameters, 
+                            kind='wind')
+            df = pd.read_csv(URL, skiprows=1)[:8760]
+            df.rename(columns={'wind speed at 80m (m/s)':f"{n}"}, inplace=True)
+            frames.append(df)
+        
+        wind_df = pd.concat(frames, axis=1)
+        all_frames.append(wind_df)
+    full_df = pd.concat(all_frames, axis=0)
+    full_df = handle_datetime(full_df)
     
-    return wind_df
+    return full_df
 
 
 def turbine_power(v):

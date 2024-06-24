@@ -3,7 +3,9 @@ import numpy as np
 import pypsa
 import matplotlib.pyplot as plt
 
-def plot_dispatch(n, time="2025-07"):
+def plot_dispatch(n, year=2025, month=7):
+    
+    time = (year, f'{year}-0{month}')
     p_by_carrier = n.generators_t.p.groupby(n.generators.carrier, axis=1).sum().div(1e3)
     
     p_by_carrier = p_by_carrier[['Nuclear', 

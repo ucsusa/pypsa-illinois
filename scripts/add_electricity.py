@@ -6,19 +6,23 @@ import geopandas as gpd
 from tqdm import tqdm
 import pypsa
 
-model_year = snakemake.config['model_year']
+model_years = np.array(snakemake.config['model_years']).astype('int')
+resolution = int(snakemake.config['time_res'])
+
 
 def annuity(r, n):
     return r / (1-1/(1+r)**n)
 
 
 def create_snapshots():
-    snapshots = pd.date_range(start=f"{model_year}-01-01", 
-                            end=f"{model_year+1}-01-01", 
-                            freq='1h', 
-                            inclusive='left')
+    timestamps = pd.DatetimeIndex([])
+    for year in model_years:
+        period = pd.date_range(start=f"{year}-01-01",
+                                        freq=f"{resolution}h",
+                                        periods=8760/resolution)
+        timestamps = timestamps.append(period)
     
-    return snapshots
+    return timestamps
 
 
 def load_costs():
@@ -57,13 +61,13 @@ def load_existing_generators():
 def attach_load(n):
     load = pd.read_csv(snakemake.input.load, parse_dates=True, index_col="Interval End")
     
-    load = load.loc[str(snakemake.config['load_year'])]
-    
-    snapshots = create_snapshots()
-    
-    load.set_index(snapshots, inplace=True)
-    
+    start = int(snakemake.config['load_year'])
+    n_model_years = len(snakemake.config['model_years'])
+    end = start + n_model_years - 1
+    load = load.loc[str(start):str(end)][:int(n_model_years*8760)]
     load = load.resample(f"{snakemake.config['time_res']}h").mean()
+
+    load.set_index(n.snapshots, inplace=True)
     
     print('Adding loads to model')
     for bus in tqdm(n.buses.index):
@@ -77,18 +81,20 @@ def attach_load(n):
 
 
 def attach_generators(n, costs, generators):
-    costs = costs.xs((slice(None), slice(None), model_year))
+    costs = costs.xs((slice(None), slice(None), model_years[0]))
 
     available_carriers = costs.index.get_level_values('technology_alias').unique().to_list()
     
-    snapshots = create_snapshots()
     wind_profile = pd.read_csv(snakemake.input.wind_profile, parse_dates=True, index_col=0)
-    wind_profile.set_index(snapshots, inplace=True)
     wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean()
+    wind_profile = pd.concat([wind_profile.loc[str(year)] for year in model_years])
+    wind_profile.set_index(n.snapshots, inplace=True)
     
     solar_profile = pd.read_csv(snakemake.input.solar_profile, parse_dates=True, index_col=0)
-    solar_profile.set_index(snapshots, inplace=True)
     solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean()
+    solar_profile = pd.concat([solar_profile.loc[str(year)] for year in model_years])
+    solar_profile.set_index(n.snapshots, inplace=True)
+    
     
     # add carriers
     for carrier in available_carriers:

@@ -4,10 +4,10 @@ geo_res: 'rto'  # accepts: 'rto' or 'county'
 time_res: 4  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
 
-model_year: 2025
+model_years: [2025, 2030, 2035, 2040]
 
-solar_year: 2019  # NSRDB only accepts years 1998-2020
-wind_year: 2011  # WTK only goes from 2009-2013
+solar_years: [2017, 2018, 2019, 2020]  # NSRDB only accepts years 1998-2020
+wind_years: [2010,2011,2012,2013]  # WTK only goes from 2009-2013
 load_year: 2019
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
@@ -61,7 +61,6 @@ lines:  # this is an assumption
   r: 1  # resistance
   s_nom_extendable: True
 
-
 turbine_params:
   cut_in: 3.0  # m/s
   cut_out: 25.0  # m/s
@@ -70,29 +69,13 @@ turbine_params:
   rated_power: 2.75  # MW
   air_density: 1.225  # kg/m^3
 
-# extendable_techs:  [
-#       'CCAvgCF', 
-#       'CTAvgCF', 
-#       'Biopower', 
-#       'Land-Based Wind',
-#       'Utility PV', 
-#       'IGCCAvgCF', 
-#       'LWR',
-#       'NuclearSMR', 
-#       '10Hr Battery Storage', 
-#       '8Hr Battery Storage',
-#       '6Hr Battery Storage', 
-#       '4Hr Battery Storage', 
-#       '2Hr Battery Storage'
-#       ]
-
 extendable_techs:  [
       # 'CCAvgCF', 
       # 'CTAvgCF', 
+      # 'IGCCAvgCF', 
       # 'Biopower', 
       # 'Land-Based Wind',
       # 'Utility PV', 
-      # 'IGCCAvgCF', 
       # 'LWR',
       # 'NuclearSMR', 
       # '10Hr Battery Storage', 

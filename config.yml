@@ -76,15 +76,15 @@ extendable_techs:  [
       # 'CTAvgCF', 
       # 'IGCCAvgCF', 
       # 'Biopower', 
-      # 'Land-Based Wind',
-      # 'Utility PV', 
+      'Land-Based Wind',
+      'Utility PV', 
       # 'LWR',
-      # 'NuclearSMR', 
-      # '10Hr Battery Storage', 
-      # '8Hr Battery Storage',
-      # '6Hr Battery Storage', 
-      # '4Hr Battery Storage', 
-      # '2Hr Battery Storage'
+      'NuclearSMR', 
+      '10Hr Battery Storage', 
+      '8Hr Battery Storage',
+      '6Hr Battery Storage', 
+      '4Hr Battery Storage', 
+      '2Hr Battery Storage'
       ]
 
 carrier_colors:

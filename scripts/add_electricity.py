@@ -80,7 +80,13 @@ def attach_load(n):
     return
 
 
-def attach_generators(n, costs, generators):
+def load_emissions():
+    df = pd.read_csv(snakemake.input.emissions, index_col=0)
+    
+    return df
+
+
+def attach_generators(n, costs, generators, emissions):
     costs = costs.xs((slice(None), slice(None), model_years[0]))
 
     available_carriers = costs.index.get_level_values('technology_alias').unique().to_list()
@@ -98,8 +104,15 @@ def attach_generators(n, costs, generators):
     
     # add carriers
     for carrier in available_carriers:
+        # emissions data
+        try:
+            co2_emissions = emissions.at[carrier,'tCO2 per MWh']
+        except KeyError:
+            co2_emissions = 0.0
+            
         n.add(class_name="Carrier",
               name=carrier, 
+              co2_emissions=co2_emissions,
               color=snakemake.config['carrier_colors'][carrier])
         
     # flatten index
@@ -121,6 +134,20 @@ def attach_generators(n, costs, generators):
                 class_name = "Generator"
                 max_hours = 0.0
                 cyclic_state_of_charge=False
+                
+            # ramp limits
+            if tech in ['LWR']:
+                ramp_limit_up = 0.01*resolution
+                ramp_limit_down = 0.01*resolution
+            elif tech in ['IGCCAvgCF']:
+                ramp_limit_up = 0.1*resolution
+                ramp_limit_down = 0.1*resolution
+            elif tech in ['CCAvgCF','CTAvgCF']:
+                ramp_limit_up = min(0.6*resolution,1.0)
+                ramp_limit_down = min(0.6*resolution,1.0)
+            else:
+                ramp_limit_up = 1.0
+                ramp_limit_down = 1.0
             
             # existing capacity
             if tech in generators.loc[bus].index:
@@ -151,6 +178,8 @@ def attach_generators(n, costs, generators):
                   capital_cost=capital_cost,
                   marginal_cost=marginal_cost,
                   lifetime=lifetime,
+                  ramp_limit_down = ramp_limit_down,
+                  ramp_limit_up = ramp_limit_up,
                   max_hours=max_hours,
                   cyclic_state_of_charge=cyclic_state_of_charge)
     return
@@ -166,8 +195,21 @@ if __name__ == "__main__":
     
     generators = load_existing_generators()
     
+    emissions = load_emissions()
+    
     attach_load(n)
-    attach_generators(n, costs=costs, generators=generators)    
+    attach_generators(n, 
+                      costs=costs, 
+                      generators=generators, 
+                      emissions=emissions)   
+    
+    # add co2 constraint
+    n.add(class_name="GlobalConstraint",
+          name="CO2 Limit",
+          carrier_attribute='co2_emissions',
+          sense="<=",
+          investment_period=2040,
+          constant=0) 
     
     n.export_to_netcdf(snakemake.output.elec_network)
     

@@ -57,6 +57,6 @@ if __name__ == "__main__":
     
     n.export_to_netcdf(snakemake.output.solved_network)
     
-    fig, ax = plot_dispatch(n)
+    fig, ax = plot_dispatch(n, year=int(snakemake.config['plot_year']))
     
     plt.savefig(snakemake.output.dispatch_figure)

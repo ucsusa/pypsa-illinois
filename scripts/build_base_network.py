@@ -4,11 +4,11 @@ import numpy as np
 import pypsa
 
 
-def add_snapshots(network):
-    resolution = int(snakemake.config['time_res'])
+model_years = np.array(snakemake.config['model_years']).astype('int')
+resolution = int(snakemake.config['time_res'])
 
-    model_years = np.array(snakemake.config['model_years']).astype('int')
-    
+def add_snapshots(network):
+
     n_hours = 8760
     
     snapshots = pd.DatetimeIndex([])
@@ -44,4 +44,16 @@ def base_network():
 if __name__ == "__main__":
     n = base_network()
     add_snapshots(n)
+    
+    
+    n.investment_period_weightings["years"] = list(np.diff(model_years)) + [5]
+
+    r = 0.01
+    T = 0
+    for period, nyears in n.investment_period_weightings.years.items():
+        discounts = [(1 / (1 + r) ** t) for t in range(T, T + nyears)]
+        n.investment_period_weightings.at[period, "objective"] = sum(discounts)
+        T += nyears
+    n.investment_period_weightings
+    
     n.export_to_netcdf(snakemake.output.network)

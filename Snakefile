@@ -75,11 +75,17 @@ rule add_electricity:
         final_costs = "data/final_costs.csv"
     script: "scripts/add_electricity.py"
 
-
 rule solve_network:
     input:
         elec_network = "data/networks/electricity_network.nc"
     output:
-        solved_network = "results/networks/illinois_solved.nc",
-        dispatch_figure = "results/figures/illinois_dispatch.png"
+        solved_network = "results/networks/illinois_solved.nc"
     script: "scripts/solve_network.py"
+
+rule plot_results:
+    input:
+        solved_network = "results/networks/illinois_solved.nc"
+    output: 
+        dispatch_figure = "results/figures/illinois_dispatch.png",
+        capacity_figure = "results/figures/illinois_capacity.png"
+    script: "scripts/plot_results.py"

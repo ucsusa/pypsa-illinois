@@ -264,12 +264,12 @@ if __name__ == "__main__":
                    generators=generators)
     
     # add co2 constraint
-    n.add(class_name="GlobalConstraint",
-          name="CO2 Limit",
-          carrier_attribute='co2_emissions',
-          sense="<=",
-          investment_period=model_years[-1],
-          constant=0) 
+    # n.add(class_name="GlobalConstraint",
+    #       name="CO2 Limit",
+    #       carrier_attribute='co2_emissions',
+    #       sense="<=",
+    #       investment_period=model_years[-1],
+    #       constant=0) 
     
     n.export_to_netcdf(snakemake.output.elec_network)
     

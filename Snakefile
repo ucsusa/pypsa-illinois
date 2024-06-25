@@ -87,5 +87,6 @@ rule plot_results:
         solved_network = "results/networks/illinois_solved.nc"
     output: 
         dispatch_figure = "results/figures/illinois_dispatch.png",
-        capacity_figure = "results/figures/illinois_capacity.png"
+        capacity_figure = "results/figures/illinois_capacity.png",
+        emissions_figure = "results/figures/illinois_emissions.png"
     script: "scripts/plot_results.py"

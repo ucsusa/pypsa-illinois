@@ -64,7 +64,7 @@ def plot_capacity(n):
     return fig,ax
     
     
-def plot_emissions(n):
+def plot_emissions(n, time_res=4):
     
     emissions_data = n.carriers\
                         .reset_index()\
@@ -74,15 +74,21 @@ def plot_emissions(n):
     
     p_by_carrier = n.generators_t.p.groupby(n.generators.carrier, axis=1).sum()
     
-    emissions_by_carrier_year = p_by_carrier.groupby(n.generators_t.p.index.get_level_values('timestep').year).sum()
+    p_by_carrier_year = (p_by_carrier.groupby(p_by_carrier.index.get_level_values('period')).sum())
     
-    annual_emissions = emissions_by_carrier_year * emissions_data['co2_emissions'].sum(axis=1).to_frame()
+    annual_emissions = (p_by_carrier_year * emissions_data['co2_emissions']).sum(axis=1).to_frame()
+    
+    annual_emissions = annual_emissions * time_res / 1e6
+    
+    annual_emissions.columns = ['Mtonnes CO2/year']
 
     fig, ax = plt.subplots(figsize=(12,8))
     
-    (annual_emissions/1e6).plot.bar(ax=ax)
+    annual_emissions.plot.bar(ax=ax)
     
-    ax.set_ylabel("Mtons CO2/year")
+    ax.set_ylabel("Mtonnes CO2/year")
+    
+    return fig, ax
 
 
 if __name__ == "__main__":
@@ -95,3 +101,6 @@ if __name__ == "__main__":
     
     fig, ax = plot_capacity(n)
     plt.savefig(snakemake.output.capacity_figure)
+    
+    fig, ax = plot_emissions(n, float(snakemake.config['time_res']))
+    plt.savefig(snakemake.output.emissions_figure)

@@ -45,8 +45,13 @@ if __name__ == "__main__":
     n = base_network()
     add_snapshots(n)
     
+    year_diff = np.diff(model_years)
+    if len(year_diff) == 0:
+        pad = 1
+    else:
+        pad = year_diff[-1]
     
-    n.investment_period_weightings["years"] = list(np.diff(model_years)) + [15]
+    n.investment_period_weightings["years"] = list(year_diff) + [pad]
 
     r = 0.01
     T = 0

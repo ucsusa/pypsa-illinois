@@ -3,15 +3,17 @@ state_abbr: 'IL'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
 time_res: 4  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
+total_demand: 136e6  # Annual MWh
+load_growth: 0.  # annual growth
 
-model_years: [2025,2040]
-plot_year: 2040
+model_years: [2025]
+plot_year: 2025
 
 # co2_limits:
 #   2025:  
 
-solar_years: [2017,2018]  # NSRDB only accepts years 1998-2020
-wind_years: [2010,2011]  # WTK only goes from 2009-2013
+solar_years: [2017]  # NSRDB only accepts years 1998-2020
+wind_years: [2010]  # WTK only goes from 2009-2013
 load_year: 2019
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd

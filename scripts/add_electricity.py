@@ -66,7 +66,7 @@ def attach_load(n):
     end = start + n_model_years - 1
     load = load.loc[str(start):str(end)][:int(n_model_years*8760)]
     load = load.resample(f"{snakemake.config['time_res']}h").mean()
-
+    load = load[:len(n.snapshots)]
     load.set_index(n.snapshots, inplace=True)
     
     print('Adding loads to model')
@@ -86,23 +86,9 @@ def load_emissions():
     return df
 
 
-def attach_generators(n, costs, generators, emissions):
-    costs = costs.xs((slice(None), slice(None), model_years[0]))
-
-    available_carriers = costs.index.get_level_values('technology_alias').unique().to_list()
+def add_carriers(n, costs, emissions):
+    available_carriers = list(costs['technology_alias'].unique())
     
-    wind_profile = pd.read_csv(snakemake.input.wind_profile, parse_dates=True, index_col=0)
-    wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean()
-    wind_profile = pd.concat([wind_profile.loc[str(year)] for year in model_years])
-    wind_profile.set_index(n.snapshots, inplace=True)
-    
-    solar_profile = pd.read_csv(snakemake.input.solar_profile, parse_dates=True, index_col=0)
-    solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean()
-    solar_profile = pd.concat([solar_profile.loc[str(year)] for year in model_years])
-    solar_profile.set_index(n.snapshots, inplace=True)
-    
-    
-    # add carriers
     for carrier in available_carriers:
         # emissions data
         try:
@@ -114,76 +100,138 @@ def attach_generators(n, costs, generators, emissions):
               name=carrier, 
               co2_emissions=co2_emissions,
               color=snakemake.config['carrier_colors'][carrier])
-        
-    # flatten index
-    costs = costs.reset_index()
-    costs.loc[costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
+    return
+
+def attach_renewables(n, costs, generators):
+    carriers = ['Wind','Solar']
+    wind_profile = pd.read_csv(snakemake.input.wind_profile, parse_dates=True, index_col=0)
+    wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean()
+    wind_profile = pd.concat([wind_profile.loc[str(year)] for year in model_years])
+    wind_profile = wind_profile[:len(n.snapshots)]
+    wind_profile.set_index(n.snapshots, inplace=True)
+    
+    solar_profile = pd.read_csv(snakemake.input.solar_profile, parse_dates=True, index_col=0)
+    solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean()
+    solar_profile = pd.concat([solar_profile.loc[str(year)] for year in model_years])
+    solar_profile = solar_profile[:len(n.snapshots)]
+    solar_profile.set_index(n.snapshots, inplace=True) 
+     
     for bus in n.buses.index:
         for item in costs.itertuples():
             tech = item.techdetail
             carrier = item.technology_alias
-            capital_cost = item.capital_cost
-            marginal_cost = item.marginal_cost
-            lifetime = item.lifetime
-            
-            if carrier == 'Batteries':
-                class_name = "StorageUnit"
-                max_hours = float(tech.split(' ')[0].strip('Hr'))
-                cyclic_state_of_charge=True
-            else: 
-                class_name = "Generator"
-                max_hours = 0.0
-                cyclic_state_of_charge=False
-                
-            # ramp limits
-            if tech in ['LWR']:
-                ramp_limit_up = 0.01*resolution
-                ramp_limit_down = 0.01*resolution
-            elif tech in ['IGCCAvgCF']:
-                ramp_limit_up = 0.1*resolution
-                ramp_limit_down = 0.1*resolution
-            elif tech in ['CCAvgCF','CTAvgCF']:
-                ramp_limit_up = min(0.6*resolution,1.0)
-                ramp_limit_down = min(0.6*resolution,1.0)
-            else:
-                ramp_limit_up = 1.0
-                ramp_limit_down = 1.0
-            
-            # existing capacity
-            if tech in generators.loc[bus].index:
-                p_nom = generators.at[bus, tech]
-            else:
-                p_nom = 0.0
-                
-            # renewables
-            if carrier == 'Wind':
-                p_max_pu = p_min_pu = wind_profile[bus]
-            elif carrier == 'Solar':
-                p_max_pu = p_min_pu = solar_profile[bus]
-            else:
-                p_max_pu = 1
-                p_min_pu = 0
-                
-            extendable = tech in snakemake.config['extendable_techs']
+            if carrier in carriers:
+                # existing capacity
+                if tech in generators.loc[bus].index:
+                    p_nom = generators.at[bus, tech]
+                else:
+                    p_nom = 0.0
+                    
+                # renewables
+                if carrier == 'Wind':
+                    p_max_pu = wind_profile[bus]
+                elif carrier == 'Solar':
+                    p_max_pu = solar_profile[bus]
+                    
+                extendable = tech in snakemake.config['extendable_techs']
 
-            n.add(class_name=class_name,
-                  name=f"{bus} {tech}",
-                  bus=bus,
-                  p_nom=p_nom,
-                  p_nom_min=p_nom,
-                  p_min_pu=p_min_pu,
-                  p_max_pu=p_max_pu,
-                  p_nom_extendable=extendable,
-                  carrier=carrier,
-                  capital_cost=capital_cost,
-                  marginal_cost=marginal_cost,
-                  lifetime=lifetime,
-                  ramp_limit_down = ramp_limit_down,
-                  ramp_limit_up = ramp_limit_up,
-                  max_hours=max_hours,
-                  cyclic_state_of_charge=cyclic_state_of_charge)
-    return
+                n.add(class_name="Generator",
+                    name=f"{bus} {tech}",
+                    bus=bus,
+                    p_nom=p_nom,
+                    p_nom_min=p_nom,
+                    p_max_pu=p_max_pu,
+                    p_nom_extendable=extendable,
+                    carrier=carrier,
+                    capital_cost=item.capital_cost,
+                    marginal_cost=item.marginal_cost,
+                    lifetime=item.lifetime,)
+    return 
+
+
+def attach_generators(n, costs, generators):
+    carriers = ['Natural Gas','Biomass','Coal','Nuclear','Petroleum']
+    for bus in n.buses.index:
+        for item in costs.itertuples():
+            tech = item.techdetail
+            carrier = item.technology_alias
+            if carrier in carriers:
+                # ramp limits
+                if tech in ['LWR']:
+                    ramp_limit_up = 0.01*resolution
+                    ramp_limit_down = 0.01*resolution
+                elif tech in ['IGCCAvgCF', 'Biopower']:
+                    ramp_limit_up = 0.1*resolution
+                    ramp_limit_down = 0.1*resolution
+                elif tech in ['CCAvgCF','CTAvgCF']:
+                    ramp_limit_up = min(0.6*resolution,1.0)
+                    ramp_limit_down = min(0.6*resolution,1.0)
+                else:
+                    ramp_limit_up = 1.0
+                    ramp_limit_down = 1.0
                 
+                # existing capacity
+                if tech in generators.loc[bus].index:
+                    p_nom = generators.at[bus, tech]
+                else:
+                    p_nom = 0.0
+
+                if tech == 'LWR':
+                    p_min_pu = 0.0
+                    p_max_pu = 1.0  
+                else:
+                    p_max_pu = 1
+                    p_min_pu = 0
+                    
+                extendable = tech in snakemake.config['extendable_techs']
+
+                n.add(class_name="Generator",
+                    name=f"{bus} {tech}",
+                    bus=bus,
+                    p_nom=p_nom,
+                    p_nom_min=p_nom,
+                    p_nom_extendable=extendable,
+                    p_min_pu = p_min_pu,
+                    p_max_pu = p_max_pu,
+                    carrier=carrier,
+                    capital_cost=item.capital_cost,
+                    marginal_cost=item.marginal_cost,
+                    lifetime=item.lifetime,
+                    ramp_limit_down = ramp_limit_down,
+                    ramp_limit_up = ramp_limit_up,
+                    )
+    return
+              
+              
+def attach_storage(n, costs, generators):
+    carriers = ["Batteries"]
+    for bus in n.buses.index:
+        for item in costs.itertuples():
+            tech = item.techdetail
+            carrier = item.technology_alias
+            if carrier in carriers:
+                # existing capacity
+                if tech in generators.loc[bus].index:
+                    p_nom = generators.at[bus, tech]
+                else:
+                    p_nom = 0.0
+                    
+                extendable = tech in snakemake.config['extendable_techs']
+
+                n.add(class_name="StorageUnit",
+                    name=f"{bus} {tech}",
+                    bus=bus,
+                    p_nom=p_nom,
+                    p_nom_min=p_nom,
+                    p_nom_extendable=extendable,
+                    carrier=carrier,
+                    capital_cost=item.capital_cost,
+                    marginal_cost=item.marginal_cost,
+                    lifetime=item.lifetime,
+                    max_hours=float(tech.split(' ')[0].strip('Hr')),
+                    cyclic_state_of_charge=False)
+        
+    return  
 
 
 if __name__ == "__main__":
@@ -192,23 +240,35 @@ if __name__ == "__main__":
     costs = load_costs()
     
     costs.to_csv("data/final_costs.csv")
+    costs = costs.xs((slice(None), slice(None), model_years[0]))
+    costs = costs.reset_index()
+    costs.loc[costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
     
     generators = load_existing_generators()
     
     emissions = load_emissions()
     
     attach_load(n)
+    add_carriers(n, 
+                 costs=costs,
+                 emissions=emissions)
+    attach_renewables(n,
+                      costs=costs,
+                      generators=generators)
     attach_generators(n, 
                       costs=costs, 
-                      generators=generators, 
-                      emissions=emissions)   
+                      generators=generators
+                      )   
+    attach_storage(n,
+                   costs=costs,
+                   generators=generators)
     
     # add co2 constraint
     n.add(class_name="GlobalConstraint",
           name="CO2 Limit",
           carrier_attribute='co2_emissions',
           sense="<=",
-          investment_period=2040,
+          investment_period=model_years[-1],
           constant=0) 
     
     n.export_to_netcdf(snakemake.output.elec_network)

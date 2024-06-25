@@ -63,6 +63,26 @@ def plot_capacity(n):
     
     return fig,ax
     
+    
+def plot_emissions(n):
+    
+    emissions_data = n.carriers\
+                        .reset_index()\
+                            .sort_values(by='Carrier')\
+                                .set_index('Carrier')[['co2_emissions']]\
+                                    .drop('Batteries')
+    
+    p_by_carrier = n.generators_t.p.groupby(n.generators.carrier, axis=1).sum()
+    
+    emissions_by_carrier_year = p_by_carrier.groupby(n.generators_t.p.index.get_level_values('timestep').year).sum()
+    
+    annual_emissions = emissions_by_carrier_year * emissions_data['co2_emissions'].sum(axis=1).to_frame()
+
+    fig, ax = plt.subplots(figsize=(12,8))
+    
+    (annual_emissions/1e6).plot.bar(ax=ax)
+    
+    ax.set_ylabel("Mtons CO2/year")
 
 
 if __name__ == "__main__":

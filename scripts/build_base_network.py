@@ -46,7 +46,7 @@ if __name__ == "__main__":
     add_snapshots(n)
     
     
-    n.investment_period_weightings["years"] = list(np.diff(model_years)) + [5]
+    n.investment_period_weightings["years"] = list(np.diff(model_years)) + [15]
 
     r = 0.01
     T = 0

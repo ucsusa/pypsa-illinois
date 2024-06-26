@@ -13,7 +13,7 @@ model_years: [2025]
 plot_year: 2025
 
 co2_limits:
-  2025: 25
+  2025: 25  # MT
   2030: 18.75
   2035: 12.5
   2040: 6.25
@@ -71,8 +71,8 @@ atb_params:
 lines:  # this is an assumption
   v_nom: 400.
   s_nom: 0.
-  x: 1  # reactance
-  r: 1  # resistance
+  x: 0.001  # reactance
+  r: 0.001  # resistance
   s_nom_extendable: True
 
 turbine_params:

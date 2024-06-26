@@ -64,7 +64,7 @@ def plot_capacity(n):
     return fig,ax
     
     
-def plot_emissions(n, time_res=4):
+def plot_emissions(n, time_res):
     
     emissions_data = n.carriers\
                         .reset_index()\
@@ -72,13 +72,16 @@ def plot_emissions(n, time_res=4):
                                 .set_index('Carrier')[['co2_emissions']]\
                                     .drop('Batteries')
     
+    emissions = n.generators_t.p * n.generators.carrier.map(n.carriers.co2_emissions)
+    total_emissions = n.snapshot_weightings.generators @ emissions.sum(axis=1).div(1e6)
+    
     p_by_carrier = n.generators_t.p.groupby(n.generators.carrier, axis=1).sum()
     
     p_by_carrier_year = (p_by_carrier.groupby(p_by_carrier.index.get_level_values('period')).sum())
     
     annual_emissions = (p_by_carrier_year * emissions_data['co2_emissions']).sum(axis=1).to_frame()
     
-    annual_emissions = annual_emissions / 1e6
+    annual_emissions = annual_emissions * time_res / 1e6
     
     annual_emissions.columns = ['Mtonnes CO2/year']
 

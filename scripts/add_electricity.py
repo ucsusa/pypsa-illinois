@@ -9,6 +9,8 @@ import pypsa
 model_years = np.array(snakemake.config['model_years']).astype('int')
 resolution = int(snakemake.config['time_res'])
 
+BUILD_YEAR = 2020  # a universal build year place holder
+
 
 def annuity(r, n):
     return r / (1-1/(1+r)**n)
@@ -62,11 +64,13 @@ def linear_growth(init_value, start_year, end_year, N_years, growth_rate):
         return rate * init_val * (x - start) + init_val
     years = np.linspace(start_year, end_year, N_years).astype('int')
     growth_data = model(years, init_value, start_year, growth_rate)
+    growth_df = pd.DataFrame({'demand':growth_data})
+    growth_df.index = pd.date_range(start=str(start_year), end=str(end_year), periods=N_years)
 
-    return growth_data
-    
+    return growth_df
+     
 
-# attach components
+# attach components 
 def attach_load(n):
     initial_demand = float(snakemake.config['total_demand'])
     
@@ -74,7 +78,12 @@ def attach_load(n):
         demand = [initial_demand]
     else:
         rate = float(snakemake.config['load_growth'])
-        # demand = linear_growth(initial_demand, model_years[0], model_years[-1],)
+        demand = linear_growth(initial_demand, 
+                               model_years[0], 
+                               model_years[-1], 
+                               rate
+                               )
+        demand = demand.loc[model_years.astype('str')].values.flatten()
     
     
     load = pd.read_csv(snakemake.input.load, parse_dates=True, index_col="Interval End")
@@ -83,6 +92,11 @@ def attach_load(n):
     n_model_years = len(snakemake.config['model_years'])
     end = start + n_model_years - 1
     load = load.loc[str(start):str(end)][:int(n_model_years*8760)]
+    # normalize the load data
+    
+    for d,y in zip(demand, load.index.year.unique()):
+        load.loc[str(y)] = load.loc[str(y)].div(load.loc[str(y)].sum(axis=0).sum(),axis=1)*d
+    
     load = load.resample(f"{snakemake.config['time_res']}h").mean()
     load = load[:len(n.snapshots)]
     load.set_index(n.snapshots, inplace=True)
@@ -163,7 +177,8 @@ def attach_renewables(n, costs, generators):
                     carrier=carrier,
                     capital_cost=item.capital_cost,
                     marginal_cost=item.marginal_cost,
-                    lifetime=item.lifetime,)
+                    lifetime=item.lifetime,
+                    build_year=BUILD_YEAR)
     return 
 
 
@@ -224,6 +239,7 @@ def attach_generators(n, costs, generators):
                     lifetime=item.lifetime,
                     ramp_limit_down = ramp_limit_down,
                     ramp_limit_up = ramp_limit_up,
+                    build_year=BUILD_YEAR,
                     )
     return
               
@@ -254,7 +270,8 @@ def attach_storage(n, costs, generators):
                     marginal_cost=item.marginal_cost,
                     lifetime=item.lifetime,
                     max_hours=float(tech.split(' ')[0].strip('Hr')),
-                    cyclic_state_of_charge=False)
+                    cyclic_state_of_charge=False,
+                    build_year=BUILD_YEAR)
         
     return  
 
@@ -297,7 +314,7 @@ if __name__ == "__main__":
               carrier_attribute='co2_emissions',
               sense="<=",
               investment_period=y,
-              constant=float(emissions_dict[y])) 
+              constant=float(emissions_dict[y])*1e6) 
     
     n.export_to_netcdf(snakemake.output.elec_network)
     

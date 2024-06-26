@@ -78,7 +78,7 @@ def plot_emissions(n, time_res=4):
     
     annual_emissions = (p_by_carrier_year * emissions_data['co2_emissions']).sum(axis=1).to_frame()
     
-    annual_emissions = annual_emissions * time_res / 1e6
+    annual_emissions = annual_emissions / 1e6
     
     annual_emissions.columns = ['Mtonnes CO2/year']
 

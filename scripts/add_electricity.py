@@ -56,9 +56,27 @@ def load_existing_generators():
 
     return generators
     
+    
+def linear_growth(init_value, start_year, end_year, N_years, growth_rate):
+    def model(x, init_val, start, rate): 
+        return rate * init_val * (x - start) + init_val
+    years = np.linspace(start_year, end_year, N_years).astype('int')
+    growth_data = model(years, init_value, start_year, growth_rate)
+
+    return growth_data
+    
 
 # attach components
 def attach_load(n):
+    initial_demand = float(snakemake.config['total_demand'])
+    
+    if len(model_years) == 1:
+        demand = [initial_demand]
+    else:
+        rate = float(snakemake.config['load_growth'])
+        # demand = linear_growth(initial_demand, model_years[0], model_years[-1],)
+    
+    
     load = pd.read_csv(snakemake.input.load, parse_dates=True, index_col="Interval End")
     
     start = int(snakemake.config['load_year'])
@@ -94,7 +112,7 @@ def add_carriers(n, costs, emissions):
         try:
             co2_emissions = emissions.at[carrier,'tCO2 per MWh']
         except KeyError:
-            co2_emissions = 0.0
+            co2_emissions = 0.00
             
         n.add(class_name="Carrier",
               name=carrier, 
@@ -156,40 +174,47 @@ def attach_generators(n, costs, generators):
             tech = item.techdetail
             carrier = item.technology_alias
             if carrier in carriers:
-                # ramp limits
-                if tech in ['LWR']:
-                    ramp_limit_up = 0.01*resolution
-                    ramp_limit_down = 0.01*resolution
-                elif tech in ['IGCCAvgCF', 'Biopower']:
-                    ramp_limit_up = 0.1*resolution
-                    ramp_limit_down = 0.1*resolution
-                elif tech in ['CCAvgCF','CTAvgCF']:
-                    ramp_limit_up = min(0.6*resolution,1.0)
-                    ramp_limit_down = min(0.6*resolution,1.0)
-                else:
-                    ramp_limit_up = 1.0
-                    ramp_limit_down = 1.0
-                
                 # existing capacity
                 if tech in generators.loc[bus].index:
                     p_nom = generators.at[bus, tech]
                 else:
                     p_nom = 0.0
+                # ramp limits
+                if tech in ['LWR']:
+                    ramp_limit_up = 0.01*resolution
+                    ramp_limit_down = 0.01*resolution
+                    p_nom_min = p_nom
+                elif tech in ['IGCCAvgCF', 'Biopower']:
+                    ramp_limit_up = 0.1*resolution
+                    ramp_limit_down = 0.1*resolution
+                    p_nom_min = 0
+                elif tech in ['CCAvgCF','CTAvgCF']:
+                    ramp_limit_up = min(0.6*resolution,1.0)
+                    ramp_limit_down = min(0.6*resolution,1.0)
+                    p_nom_min = 0
+                elif tech in ['Petroleum']:
+                    ramp_limit_up = 1.0
+                    ramp_limit_down = 1.0
+                    p_nom_min = 0
+                else:   
+                    ramp_limit_up = 1.0
+                    ramp_limit_down = 1.0
+                    p_nom_min = p_nom
 
                 if tech == 'LWR':
-                    p_min_pu = 0.0
+                    p_min_pu = 0.95
                     p_max_pu = 1.0  
                 else:
                     p_max_pu = 1
                     p_min_pu = 0
-                    
+                # yes
                 extendable = tech in snakemake.config['extendable_techs']
 
                 n.add(class_name="Generator",
                     name=f"{bus} {tech}",
                     bus=bus,
                     p_nom=p_nom,
-                    p_nom_min=p_nom,
+                    p_nom_min=p_nom_min,
                     p_nom_extendable=extendable,
                     p_min_pu = p_min_pu,
                     p_max_pu = p_max_pu,
@@ -263,13 +288,16 @@ if __name__ == "__main__":
                    costs=costs,
                    generators=generators)
     
-    # add co2 constraint
-    # n.add(class_name="GlobalConstraint",
-    #       name="CO2 Limit",
-    #       carrier_attribute='co2_emissions',
-    #       sense="<=",
-    #       investment_period=model_years[-1],
-    #       constant=0) 
+    # add co2 constraint    
+    for y in model_years:
+        emissions_dict = snakemake.config['co2_limits']
+        
+        n.add(class_name="GlobalConstraint",
+              name="CO2 Limit",
+              carrier_attribute='co2_emissions',
+              sense="<=",
+              investment_period=y,
+              constant=float(emissions_dict[y])) 
     
     n.export_to_netcdf(snakemake.output.elec_network)
     

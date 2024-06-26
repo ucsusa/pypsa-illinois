@@ -9,7 +9,7 @@ import pypsa
 model_years = np.array(snakemake.config['model_years']).astype('int')
 resolution = int(snakemake.config['time_res'])
 
-BUILD_YEAR = 2020  # a universal build year place holder
+BUILD_YEAR = 2025  # a universal build year place holder
 
 
 def annuity(r, n):
@@ -59,13 +59,17 @@ def load_existing_generators():
     return generators
     
     
-def linear_growth(init_value, start_year, end_year, N_years, growth_rate):
-    def model(x, init_val, start, rate): 
+def linear_growth(init_value, start_year, growth_rate, end_year=2050):
+    def model(x, init_val, start, rate):
         return rate * init_val * (x - start) + init_val
-    years = np.linspace(start_year, end_year, N_years).astype('int')
+    years = np.arange(start_year, end_year, 1).astype('int')
     growth_data = model(years, init_value, start_year, growth_rate)
+
     growth_df = pd.DataFrame({'demand':growth_data})
-    growth_df.index = pd.date_range(start=str(start_year), end=str(end_year), periods=N_years)
+    growth_df.index = pd.date_range(start=str(start_year), 
+                                    periods=(end_year-start_year),
+                                    freq='YE')
+
 
     return growth_df
      
@@ -78,12 +82,14 @@ def attach_load(n):
         demand = [initial_demand]
     else:
         rate = float(snakemake.config['load_growth'])
+        start_year = model_years[0]
+        end_year = model_years[-1]
+        N_years = end_year-start_year
         demand = linear_growth(initial_demand, 
                                model_years[0], 
-                               model_years[-1], 
                                rate
                                )
-        demand = demand.loc[model_years.astype('str')].values.flatten()
+        demand = demand.loc[demand.index.year.isin(model_years)].values.flatten()
     
     
     load = pd.read_csv(snakemake.input.load, parse_dates=True, index_col="Interval End")
@@ -137,15 +143,15 @@ def add_carriers(n, costs, emissions):
 def attach_renewables(n, costs, generators):
     carriers = ['Wind','Solar']
     wind_profile = pd.read_csv(snakemake.input.wind_profile, parse_dates=True, index_col=0)
-    wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean()
-    wind_profile = pd.concat([wind_profile.loc[str(year)] for year in model_years])
-    wind_profile = wind_profile[:len(n.snapshots)]
+    wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean().dropna(axis=0)
+    # wind_profile = pd.concat([wind_profile.loc[str(year)] for year in model_years])
+    # wind_profile = wind_profile[:len(n.snapshots)]
     wind_profile.set_index(n.snapshots, inplace=True)
     
     solar_profile = pd.read_csv(snakemake.input.solar_profile, parse_dates=True, index_col=0)
-    solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean()
-    solar_profile = pd.concat([solar_profile.loc[str(year)] for year in model_years])
-    solar_profile = solar_profile[:len(n.snapshots)]
+    solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean().dropna(axis=0)
+    # solar_profile = pd.concat([solar_profile.loc[str(year)] for year in model_years])
+    # solar_profile = solar_profile[:len(n.snapshots)]
     solar_profile.set_index(n.snapshots, inplace=True) 
      
     for bus in n.buses.index:
@@ -310,7 +316,7 @@ if __name__ == "__main__":
         emissions_dict = snakemake.config['co2_limits']
         
         n.add(class_name="GlobalConstraint",
-              name="CO2 Limit",
+              name=f"CO2 Limit {y}",
               carrier_attribute='co2_emissions',
               sense="<=",
               investment_period=y,

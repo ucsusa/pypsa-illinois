@@ -9,18 +9,19 @@ load_share:
   MISO-Z4: 0.33
   ComEd: 0.67
 
-model_years: [2025]
-plot_year: 2025
+model_years: [2020, 2030, 2040]
+plot_year: 2020
 
 co2_limits:
+  2020: 31.25
   2025: 25  # MT
   2030: 18.75
   2035: 12.5
   2040: 6.25
   2045: 0.0
 
-solar_years: [2017]  # NSRDB only accepts years 1998-2020
-wind_years: [2010]  # WTK only goes from 2009-2013
+solar_years: [2017,2018,2019]  # NSRDB only accepts years 1998-2020
+wind_years: [2009,2010,2011]  # WTK only goes from 2009-2013
 load_year: 2019
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd

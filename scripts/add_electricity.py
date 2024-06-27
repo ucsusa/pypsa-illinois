@@ -161,7 +161,7 @@ def load_re_profile(n, carrier='Solar'):
 
 
 
-def attach_renewables(n, costs, generators, build_years):
+def attach_renewables(n, costs, generators=None, build_years=None, model_year=None):
     carriers = ['Wind','Solar']
     
     for bus in n.buses.index:
@@ -171,17 +171,26 @@ def attach_renewables(n, costs, generators, build_years):
             if carrier in carriers:
                 re_profile = load_re_profile(n, carrier=carrier)
                 # existing capacity
-                if tech in generators.loc[bus].index:
-                    p_nom = generators.at[bus, tech]
-                else:
+                if isinstance(generators, pd.DataFrame) and isinstance(build_years, pd.DataFrame):
+                    try:
+                        p_nom = generators.at[bus, tech]
+                        build_year = build_years.at[bus, tech]
+                    except:  # the technology is not included in the list of existing generators
+                        continue
+                    name = f"{bus} {tech} EXIST"
+                    extendable = False
+                elif model_year:
+                    build_year = model_year
                     p_nom = 0.0
+                    name = f"{bus} {tech} {model_year}"
+                    extendable = tech in snakemake.config['extendable_techs']
+                    build_year = model_year
                     
                 p_max_pu = re_profile[bus]
                     
-                extendable = tech in snakemake.config['extendable_techs']
 
                 n.add(class_name="Generator",
-                    name=f"{bus} {tech}",
+                    name=name,
                     bus=bus,
                     p_nom=p_nom,
                     p_nom_min=p_nom,
@@ -191,7 +200,7 @@ def attach_renewables(n, costs, generators, build_years):
                     capital_cost=item.capital_cost,
                     marginal_cost=item.marginal_cost,
                     lifetime=item.lifetime,
-                    build_year=BUILD_YEAR)
+                    build_year=build_year)
     return 
 
 
@@ -307,11 +316,19 @@ if __name__ == "__main__":
     add_carriers(n, 
                  costs=costs,
                  emissions=emissions)
+    
+    # add existing re
     attach_renewables(n,
                       costs=costs,
                       generators=generators,
                       build_years=build_years
                       )
+    # add new re
+    for year in model_years:
+        attach_renewables(n,
+                        costs=costs,
+                        model_year=year
+                        )
     attach_generators(n, 
                       costs=costs, 
                       generators=generators,

@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import geopandas as gpd
 from tqdm import tqdm
-from unyt import m, s, MW, W, kg
+from unyt import m, s, MW, W, kg, g
 
 sys.path.append("functions")
 

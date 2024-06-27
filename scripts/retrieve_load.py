@@ -30,6 +30,7 @@ if __name__ == "__main__":
                 verbose=True)
 
     try:
+        # demand['Interval End'] = demand['Interval End'].dt.tz_convert('US/Central')
         demand['Interval End'] = demand['Interval End'].dt.tz_localize(None)
     except:
         pass

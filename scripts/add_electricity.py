@@ -204,7 +204,7 @@ def attach_renewables(n, costs, generators=None, build_years=None, model_year=No
     return 
 
 
-def attach_generators(n, costs, generators, build_years):
+def attach_generators(n, costs, generators=None, build_years=None, model_year=None):
     carriers = ['Natural Gas','Biomass','Coal','Nuclear','Petroleum']
     for bus in n.buses.index:
         for item in costs.itertuples():
@@ -212,10 +212,21 @@ def attach_generators(n, costs, generators, build_years):
             carrier = item.technology_alias
             if carrier in carriers:
                 # existing capacity
-                if tech in generators.loc[bus].index:
-                    p_nom = generators.at[bus, tech]
-                else:
+                if isinstance(generators, pd.DataFrame) and isinstance(build_years, pd.DataFrame):
+                    try:
+                        p_nom = generators.at[bus, tech]
+                        build_year = build_years.at[bus, tech]
+                    except:  # the technology is not included in the list of existing generators
+                        continue
+                    name = f"{bus} {tech} EXIST"
+                    extendable = False
+                elif model_year:
+                    build_year = model_year
                     p_nom = 0.0
+                    name = f"{bus} {tech} {model_year}"
+                    extendable = tech in snakemake.config['extendable_techs']
+                    build_year = model_year
+                    
                 # ramp limits
                 if tech in ['LWR']:
                     ramp_limit_up = 0.01*resolution
@@ -238,17 +249,16 @@ def attach_generators(n, costs, generators, build_years):
                     ramp_limit_down = 1.0
                     p_nom_min = p_nom
 
+                # minimum/maximum power output
                 if tech == 'LWR':
                     p_min_pu = 0.95
                     p_max_pu = 1.0  
                 else:
                     p_max_pu = 1
                     p_min_pu = 0
-                # yes
-                extendable = tech in snakemake.config['extendable_techs']
 
                 n.add(class_name="Generator",
-                    name=f"{bus} {tech}",
+                    name=name,
                     bus=bus,
                     p_nom=p_nom,
                     p_nom_min=p_nom_min,
@@ -261,12 +271,12 @@ def attach_generators(n, costs, generators, build_years):
                     lifetime=item.lifetime,
                     ramp_limit_down = ramp_limit_down,
                     ramp_limit_up = ramp_limit_up,
-                    build_year=BUILD_YEAR,
+                    build_year=build_year,
                     )
     return
               
               
-def attach_storage(n, costs, generators, build_years):
+def attach_storage(n, costs, generators=None, build_years=None, model_year=None):
     carriers = ["Batteries"]
     for bus in n.buses.index:
         for item in costs.itertuples():
@@ -274,15 +284,23 @@ def attach_storage(n, costs, generators, build_years):
             carrier = item.technology_alias
             if carrier in carriers:
                 # existing capacity
-                if tech in generators.loc[bus].index:
-                    p_nom = generators.at[bus, tech]
-                else:
+                if isinstance(generators, pd.DataFrame) and isinstance(build_years, pd.DataFrame):
+                    try:
+                        p_nom = generators.at[bus, tech]
+                        build_year = build_years.at[bus, tech]
+                    except:  # the technology is not included in the list of existing generators
+                        continue
+                    name = f"{bus} {tech} EXIST"
+                    extendable = False
+                elif model_year:
+                    build_year = model_year
                     p_nom = 0.0
-                    
-                extendable = tech in snakemake.config['extendable_techs']
+                    name = f"{bus} {tech} {model_year}"
+                    extendable = tech in snakemake.config['extendable_techs']
+                    build_year = model_year
 
                 n.add(class_name="StorageUnit",
-                    name=f"{bus} {tech}",
+                    name=name,
                     bus=bus,
                     p_nom=p_nom,
                     p_nom_min=p_nom,
@@ -293,7 +311,7 @@ def attach_storage(n, costs, generators, build_years):
                     lifetime=item.lifetime,
                     max_hours=float(tech.split(' ')[0].strip('Hr')),
                     cyclic_state_of_charge=False,
-                    build_year=BUILD_YEAR)
+                    build_year=build_year)
         
     return  
 
@@ -317,28 +335,37 @@ if __name__ == "__main__":
                  costs=costs,
                  emissions=emissions)
     
-    # add existing re
+    # add existing technology
     attach_renewables(n,
                       costs=costs,
                       generators=generators,
                       build_years=build_years
                       )
-    # add new re
-    for year in model_years:
-        attach_renewables(n,
-                        costs=costs,
-                        model_year=year
-                        )
     attach_generators(n, 
-                      costs=costs, 
-                      generators=generators,
-                      build_years=build_years
-                      )   
+                    costs=costs, 
+                    generators=generators,
+                    build_years=build_years
+                    )   
     attach_storage(n,
                    costs=costs,
                    generators=generators,
                    build_years=build_years
                    )
+    
+    # add new technology
+    for year in model_years:
+        attach_renewables(n,
+                        costs=costs,
+                        model_year=year
+                        )
+        attach_generators(n, 
+                        costs=costs, 
+                        model_year=year
+                        )   
+        attach_storage(n,
+                    costs=costs,
+                    model_year=year
+                    )
     
     # add co2 constraint    
     for y in model_years:

@@ -126,9 +126,19 @@ if __name__ == "__main__":
     
     gdf.to_csv(snakemake.output.generators)
     
+    gdf['build_year'] = pd.to_datetime(gdf['operating-year-month']).dt.year
+    
     scale = snakemake.config['geo_res']
     idx_opts = {"rto":"balancing_authority_code",
                 "county":"county"}
+    
+        
+    gen_build_year = gdf.pivot_table(index=idx_opts[scale],
+                                    columns='technology',
+                                    values='build_year',
+                                    aggfunc='mean').dropna(axis=1).astype('int')
+
+    gen_build_year.to_csv(snakemake.output.build_year)
     
     gen_agg = gdf.pivot_table(index=idx_opts[scale],
                                 columns='technology',

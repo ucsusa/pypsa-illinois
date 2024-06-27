@@ -28,7 +28,8 @@ rule retrieve_load:
 rule retrieve_existing_generators:
     output: 
         generators = "data/existing_generators.csv",
-        aggregated = "data/aggregated_generators.csv"
+        aggregated = "data/aggregated_generators.csv",
+        build_year = "data/build_year_generators.csv"
     script: "scripts/retrieve_generators.py"
 
 rule retrieve_renewable_profiles:
@@ -69,7 +70,8 @@ rule add_electricity:
         wind_profile = "data/time_series/wind.csv",
         solar_profile = "data/time_series/solar.csv",
         base_network = "data/networks/base_network.nc",
-        emissions = "data/technology_emissions.csv"
+        emissions = "data/technology_emissions.csv",
+        build_years = "data/build_year_generators.csv"
     output:
         elec_network = "data/networks/electricity_network.nc",
         final_costs = "data/final_costs.csv"
@@ -88,5 +90,6 @@ rule plot_results:
     output: 
         dispatch_figure = "results/figures/illinois_dispatch.png",
         capacity_figure = "results/figures/illinois_capacity.png",
-        emissions_figure = "results/figures/illinois_emissions.png"
+        emissions_figure = "results/figures/illinois_emissions.png",
+        active_units_figure = "results/figures/illinois_active_units.png"
     script: "scripts/plot_results.py"

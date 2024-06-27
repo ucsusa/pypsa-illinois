@@ -94,6 +94,32 @@ def plot_emissions(n, time_res):
     return fig, ax
 
 
+def plot_active_units(n):
+    
+    fig, ax = plt.subplots(figsize=(12,8))
+    c = "Generator"
+    df = pd.concat(
+        {
+            period: n.get_active_assets(c, period) * n.df(c).p_nom_opt
+            for period in n.investment_periods
+        },
+        axis=1,
+    )
+    df = df.groupby(n.generators.carrier).sum()
+    df.T.plot.bar(
+        ax=ax,
+        stacked=True,
+        edgecolor="white",
+        width=1,
+        ylabel="Capacity",
+        xlabel="Investment Period",
+        rot=0,
+        figsize=(10, 5),
+    )
+    plt.tight_layout()
+
+    return fig, ax
+
 if __name__ == "__main__":
     
     n = pypsa.Network(snakemake.input.solved_network)
@@ -107,3 +133,6 @@ if __name__ == "__main__":
     
     fig, ax = plot_emissions(n, float(snakemake.config['time_res']))
     plt.savefig(snakemake.output.emissions_figure)
+    
+    fig, ax = plot_active_units(n)
+    plt.savefig(snakemake.output.active_units_figure)

@@ -8,6 +8,9 @@ import pypsa
 
 model_years = np.array(snakemake.config['model_years']).astype('int')
 resolution = int(snakemake.config['time_res'])
+scale = snakemake.config['geo_res']
+idx_opts = {"rto":"balancing_authority_code",
+            "county":"county"}
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -54,9 +57,15 @@ def load_costs():
 
 def load_existing_generators():
     generators = pd.read_csv(snakemake.input.generators, 
-                             index_col='balancing_authority_code')
+                             index_col=idx_opts[scale])
 
     return generators
+
+def load_build_years():
+    build_years = pd.read_csv(snakemake.input.build_years,
+                              index_col=idx_opts[scale])
+    
+    return build_years
     
     
 def linear_growth(init_value, start_year, growth_rate, end_year=2050):
@@ -140,18 +149,14 @@ def add_carriers(n, costs, emissions):
               color=snakemake.config['carrier_colors'][carrier])
     return
 
-def attach_renewables(n, costs, generators):
+def attach_renewables(n, costs, generators, build_years):
     carriers = ['Wind','Solar']
     wind_profile = pd.read_csv(snakemake.input.wind_profile, parse_dates=True, index_col=0)
     wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean().dropna(axis=0)
-    # wind_profile = pd.concat([wind_profile.loc[str(year)] for year in model_years])
-    # wind_profile = wind_profile[:len(n.snapshots)]
     wind_profile.set_index(n.snapshots, inplace=True)
     
     solar_profile = pd.read_csv(snakemake.input.solar_profile, parse_dates=True, index_col=0)
     solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean().dropna(axis=0)
-    # solar_profile = pd.concat([solar_profile.loc[str(year)] for year in model_years])
-    # solar_profile = solar_profile[:len(n.snapshots)]
     solar_profile.set_index(n.snapshots, inplace=True) 
      
     for bus in n.buses.index:
@@ -188,7 +193,7 @@ def attach_renewables(n, costs, generators):
     return 
 
 
-def attach_generators(n, costs, generators):
+def attach_generators(n, costs, generators, build_years):
     carriers = ['Natural Gas','Biomass','Coal','Nuclear','Petroleum']
     for bus in n.buses.index:
         for item in costs.itertuples():
@@ -250,7 +255,7 @@ def attach_generators(n, costs, generators):
     return
               
               
-def attach_storage(n, costs, generators):
+def attach_storage(n, costs, generators, build_years):
     carriers = ["Batteries"]
     for bus in n.buses.index:
         for item in costs.itertuples():
@@ -293,7 +298,7 @@ if __name__ == "__main__":
     costs.loc[costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
     
     generators = load_existing_generators()
-    
+    build_years = load_build_years()
     emissions = load_emissions()
     
     attach_load(n)
@@ -302,14 +307,19 @@ if __name__ == "__main__":
                  emissions=emissions)
     attach_renewables(n,
                       costs=costs,
-                      generators=generators)
+                      generators=generators,
+                      build_years=build_years
+                      )
     attach_generators(n, 
                       costs=costs, 
-                      generators=generators
+                      generators=generators,
+                      build_years=build_years
                       )   
     attach_storage(n,
                    costs=costs,
-                   generators=generators)
+                   generators=generators,
+                   build_years=build_years
+                   )
     
     # add co2 constraint    
     for y in model_years:

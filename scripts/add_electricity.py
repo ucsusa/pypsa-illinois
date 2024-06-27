@@ -149,32 +149,34 @@ def add_carriers(n, costs, emissions):
               color=snakemake.config['carrier_colors'][carrier])
     return
 
+
+def load_re_profile(n, carrier='Solar'):
+    file_name = {'Solar':snakemake.input.solar_profile,
+                 'Wind':snakemake.input.wind_profile}  
+    re_profile = pd.read_csv(file_name[carrier], parse_dates=True, index_col=0)
+    re_profile = re_profile.resample(f"{snakemake.config['time_res']}h").mean().dropna(axis=0)
+    re_profile.set_index(n.snapshots, inplace=True) 
+    
+    return re_profile
+
+
+
 def attach_renewables(n, costs, generators, build_years):
     carriers = ['Wind','Solar']
-    wind_profile = pd.read_csv(snakemake.input.wind_profile, parse_dates=True, index_col=0)
-    wind_profile = wind_profile.resample(f"{snakemake.config['time_res']}h").mean().dropna(axis=0)
-    wind_profile.set_index(n.snapshots, inplace=True)
     
-    solar_profile = pd.read_csv(snakemake.input.solar_profile, parse_dates=True, index_col=0)
-    solar_profile = solar_profile.resample(f"{snakemake.config['time_res']}h").mean().dropna(axis=0)
-    solar_profile.set_index(n.snapshots, inplace=True) 
-     
     for bus in n.buses.index:
         for item in costs.itertuples():
             tech = item.techdetail
             carrier = item.technology_alias
             if carrier in carriers:
+                re_profile = load_re_profile(n, carrier=carrier)
                 # existing capacity
                 if tech in generators.loc[bus].index:
                     p_nom = generators.at[bus, tech]
                 else:
                     p_nom = 0.0
                     
-                # renewables
-                if carrier == 'Wind':
-                    p_max_pu = wind_profile[bus]
-                elif carrier == 'Solar':
-                    p_max_pu = solar_profile[bus]
+                p_max_pu = re_profile[bus]
                     
                 extendable = tech in snakemake.config['extendable_techs']
 

@@ -97,7 +97,7 @@ def plot_emissions(n, time_res):
 def plot_active_units(n):
     
     fig, ax = plt.subplots(figsize=(12,8))
-    c = "Generator"
+    c = "StorageUnit"
     df = pd.concat(
         {
             period: n.get_active_assets(c, period) * n.df(c).p_nom_opt
@@ -105,7 +105,18 @@ def plot_active_units(n):
         },
         axis=1,
     )
-    df = df.groupby(n.generators.carrier).sum()
+    df = df.groupby(n.storage_units.carrier).sum()
+
+    c = "Generator"
+    df2 = pd.concat(
+        {
+            period: n.get_active_assets(c, period) * n.df(c).p_nom_opt
+            for period in n.investment_periods
+        },
+        axis=1,
+    )
+    df2 = df2.groupby(n.generators.carrier).sum()
+    df = pd.concat([df, df2])
     df.T.plot.bar(
         ax=ax,
         stacked=True,

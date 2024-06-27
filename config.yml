@@ -34,7 +34,7 @@ lifetime:
   Nuclear: 80
   Biomass: 40
   Natural Gas: 40
-  Coal: 40
+  Coal: 50
   Solar: 20
   Wind: 20
   Batteries: 15

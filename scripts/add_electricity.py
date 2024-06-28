@@ -322,9 +322,9 @@ if __name__ == "__main__":
     costs = load_costs()
     
     costs.to_csv("data/final_costs.csv")
-    costs = costs.xs((slice(None), slice(None), model_years[0]))
-    costs = costs.reset_index()
-    costs.loc[costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
+    current_costs = costs.xs((slice(None), slice(None), 2020))
+    current_costs = current_costs.reset_index()
+    current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
     
     generators = load_existing_generators()
     build_years = load_build_years()
@@ -332,38 +332,41 @@ if __name__ == "__main__":
     
     attach_load(n)
     add_carriers(n, 
-                 costs=costs,
+                 costs=current_costs,
                  emissions=emissions)
     
     # add existing technology
     attach_renewables(n,
-                      costs=costs,
+                      costs=current_costs,
                       generators=generators,
                       build_years=build_years
                       )
     attach_generators(n, 
-                    costs=costs, 
+                    costs=current_costs, 
                     generators=generators,
                     build_years=build_years
                     )   
     attach_storage(n,
-                   costs=costs,
+                   costs=current_costs,
                    generators=generators,
                    build_years=build_years
                    )
     
     # add new technology
     for year in model_years:
+        current_costs = costs.xs((slice(None), slice(None), year))
+        current_costs = current_costs.reset_index()
+        current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
         attach_renewables(n,
-                        costs=costs,
+                        costs=current_costs,
                         model_year=year
                         )
         attach_generators(n, 
-                        costs=costs, 
+                        costs=current_costs, 
                         model_year=year
                         )   
         attach_storage(n,
-                    costs=costs,
+                    costs=current_costs,
                     model_year=year
                     )
     

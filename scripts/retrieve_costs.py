@@ -1,6 +1,21 @@
 import pandas as pd
 from nrelpy.atb import ATBe
 
+n_illinois_reactors = 11
+total_lwr_capacity = 12415.1
+average_reactor_size = total_lwr_capacity/n_illinois_reactors  # MW
+nuclear_params = snakemake.config['nuclear_params']
+capacity_factor = float(nuclear_params['capacity_factor'])
+capital_cost = float(nuclear_params['capital_cost'])  # $/MWh
+nuclear_fuel = float(nuclear_params['fuel'])  # $/MWh
+fixed_om = float(nuclear_params['fixed_om'])  # $/MWh
+
+# convert capital and fom to $/MW/yr
+operating_hours = 8760*capacity_factor
+nuclear_cap_cost = capital_cost*operating_hours/1e3 # $/kW/yr
+nuclear_fixed_om = fixed_om*operating_hours/1e3  # $/kW/yr
+
+
 
 if __name__ == "__main__":
     atb_params = snakemake.config['atb_params']
@@ -84,9 +99,13 @@ if __name__ == "__main__":
                  'Fuel'] = coal_price*coal_heatrate
     # add petroleum
     df_t = df_pivot.T
-
-    # these costs are from 2021 and should be updated to reflect inflation.
+    
+    # [capital cost, fixed om cost, variable om cost, fuel cost]
     for year in range(2020, 2051, 1):
+        # update costs for existing nuclear, these costs are from 2022
+        df_t['Nuclear','LWR',year] = [nuclear_cap_cost, nuclear_fixed_om, 0, nuclear_fuel]
+        
+        # these costs are from 2021 and should be updated to reflect inflation.
         df_t['Petroleum','Petroleum',year] = [1158, 27.94, 1.78, petroleum_price*petroleum_heatrate]   # from here https://www.eia.gov/electricity/generatorcosts/
     df_pivot = df_t.T
     

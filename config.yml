@@ -4,7 +4,7 @@ geo_res: 'rto'  # accepts: 'rto' or 'county'
 time_res: 4  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
 total_demand: 136e6  # Annual MWh in the first year
-load_growth: 0.  # % annual growth
+load_growth: 0.01  # % annual growth
 load_share:
   MISO-Z4: 0.33
   ComEd: 0.67

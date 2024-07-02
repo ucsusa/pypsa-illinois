@@ -1,10 +1,10 @@
 state_abbr: 'IL'
 
 geo_res: 'rto'  # accepts: 'rto' or 'county'
-time_res: 4  # hours 
+time_res: 1  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
 total_demand: 136e6  # Annual MWh in the first year
-load_growth: 0.01  # % annual growth
+load_growth: 0.00  # % annual growth
 load_share:
   MISO-Z4: 0.33
   ComEd: 0.67
@@ -28,6 +28,16 @@ rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']
 
 discount_rate: 0.07
+
+growth_rates:  # MW/year
+  Nuclear: 1e3
+  Biomass: 1e3
+  Natural Gas: 10e3
+  Coal: 10e3
+  Petroleum: 10e3
+  Batteries: 5e3
+  Solar: 5e3
+  Wind: 5e3
 
 lifetime:
   Nuclear: 80

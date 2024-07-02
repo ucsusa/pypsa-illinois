@@ -6,11 +6,13 @@ import geopandas as gpd
 from tqdm import tqdm
 import pypsa
 
+version = 22
 model_years = np.array(snakemake.config['model_years']).astype('int')
 resolution = int(snakemake.config['time_res'])
 scale = snakemake.config['geo_res']
 idx_opts = {"rto":"balancing_authority_code",
             "county":"county"}
+growth_rates = snakemake.config['growth_rates']
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -146,7 +148,8 @@ def add_carriers(n, costs, emissions):
         n.add(class_name="Carrier",
               name=carrier, 
               co2_emissions=co2_emissions,
-              color=snakemake.config['carrier_colors'][carrier])
+              color=snakemake.config['carrier_colors'][carrier],
+              max_growth=float(growth_rates[carrier]))
     return
 
 
@@ -354,9 +357,9 @@ if __name__ == "__main__":
     
     # add new technology
     for year in model_years:
-        current_costs = costs.xs((slice(None), slice(None), year))
-        current_costs = current_costs.reset_index()
-        current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
+        # current_costs = costs.xs((slice(None), slice(None), year))
+        # current_costs = current_costs.reset_index()
+        # current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
         attach_renewables(n,
                         costs=current_costs,
                         model_year=year

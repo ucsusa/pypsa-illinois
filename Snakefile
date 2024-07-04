@@ -28,7 +28,8 @@ rule retrieve_load:
 rule retrieve_existing_generators:
     output: 
         generators = "data/existing_generators.csv",
-        aggregated = "data/aggregated_generators.csv"
+        aggregated = "data/aggregated_generators.csv",
+        build_year = "data/build_year_generators.csv"
     script: "scripts/retrieve_generators.py"
 
 rule retrieve_renewable_profiles:
@@ -38,6 +39,11 @@ rule retrieve_renewable_profiles:
         wind = "data/time_series/wind.csv",
         solar = "data/time_series/solar.csv"
     script: "scripts/retrieve_renewables.py"
+
+rule retrieve_co2_emissions:
+    output: 
+        emissions = "data/technology_emissions.csv"
+    script: "scripts/retrieve_emissions.py"
 
 rule build_topology:
     input: 
@@ -63,17 +69,27 @@ rule add_electricity:
         costs = "data/technology_costs.csv",
         wind_profile = "data/time_series/wind.csv",
         solar_profile = "data/time_series/solar.csv",
-        base_network = "data/networks/base_network.nc"
+        base_network = "data/networks/base_network.nc",
+        emissions = "data/technology_emissions.csv",
+        build_years = "data/build_year_generators.csv"
     output:
         elec_network = "data/networks/electricity_network.nc",
         final_costs = "data/final_costs.csv"
     script: "scripts/add_electricity.py"
 
-
 rule solve_network:
     input:
         elec_network = "data/networks/electricity_network.nc"
     output:
-        solved_network = "results/networks/illinois_solved.nc",
-        dispatch_figure = "results/figures/illinois_dispatch.png"
+        solved_network = "results/networks/illinois_solved.nc"
     script: "scripts/solve_network.py"
+
+rule plot_results:
+    input:
+        solved_network = "results/networks/illinois_solved.nc"
+    output: 
+        dispatch_figure = "results/figures/illinois_dispatch.png",
+        capacity_figure = "results/figures/illinois_capacity.png",
+        emissions_figure = "results/figures/illinois_emissions.png",
+        active_units_figure = "results/figures/illinois_active_units.png"
+    script: "scripts/plot_results.py"

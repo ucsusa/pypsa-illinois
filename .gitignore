@@ -169,6 +169,6 @@ data/*.csv
 time_series
 spatial_data
 networks
-notebooks
+# notebooks # Remove after testing.
 
 results

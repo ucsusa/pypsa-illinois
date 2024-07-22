@@ -55,6 +55,7 @@ rule build_topology:
 
 rule build_base_network:
     input: 
+        config_file = 'config.yml',
         buses='data/buses.csv',
         lines='data/lines.csv'
     output: 

@@ -372,17 +372,22 @@ if __name__ == "__main__":
                     costs=current_costs,
                     model_year=year
                     )
-    
-    # add co2 constraint    
-    for y in model_years:
-        emissions_dict = snakemake.config['co2_limits']
         
-        n.add(class_name="GlobalConstraint",
-              name=f"CO2 Limit {y}",
-              carrier_attribute='co2_emissions',
-              sense="<=",
-              investment_period=y,
-              constant=float(emissions_dict[y])*1e6) 
+    
+    # add co2 constraint
+    emissions_dict = snakemake.config['co2_limits']    
+    for y in model_years:
+        # if y in emissions_dict.keys():
+        try:
+            n.add(class_name="GlobalConstraint",
+                name=f"CO2 Limit {y}",
+                carrier_attribute='co2_emissions',
+                sense="<=",
+                investment_period=y,
+                constant=float(emissions_dict[y])*1e6) 
+        # else:
+        except (AttributeError, KeyError, TypeError):
+            pass
     
     n.export_to_netcdf(snakemake.output.elec_network)
     

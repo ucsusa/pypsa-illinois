@@ -80,12 +80,16 @@ if __name__ == "__main__":
                                         slice(None), 
                                         price_col),
                                         atb_params['atb_year']].values[0]
+    naturalgas_price = 2.57  # $/mmbtu, 2023 average https://www.eia.gov/todayinenergy/detail.php?id=61183#
+    # naturalgas_price = 
+    
     petroleum_price = fuel_prices.loc[('Petroleum',
                                        slice(None),
                                        price_col),
                                        atb_params['atb_year']].values[0]
     
-    ng_heatrate = heatrates.at[atb_params['atb_year'], 'Natural Gas']/1e3  # converts kwh/btu to mwh/mmbtu
+    ng_heatrate = heatrates.at[atb_params['atb_year'], 'Natural Gas']/1e3  # converts btu/kwh to mmbtu/mwh
+    # ng_heatrate =1  # converts btu/kwh to mmbtu/mwh
     coal_heatrate = heatrates.at[atb_params['atb_year'], 'Coal']/1e3
     petroleum_heatrate = heatrates.at[atb_params['atb_year'], 'Petroleum']/1e3
     

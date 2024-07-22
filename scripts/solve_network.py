@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 
 
 if __name__ == "__main__":
+    solver = snakemake.config['solver']
 
     n = pypsa.Network(snakemake.input.elec_network)
 
     try:
-        n.optimize(solver_name='cplex')
+        n.optimize(solver_name=solver)
     except:
         n.optimize(solver_name='highs')
 

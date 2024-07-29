@@ -9,6 +9,8 @@ rule targets:
     input:
         "results/figures/illinois_dispatch.png",
         "results/networks/illinois_solved.nc"
+    # input:
+    #     expand("results/")
 
 rule retrieve_supply_regions:
     output: 

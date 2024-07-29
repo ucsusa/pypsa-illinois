@@ -1,17 +1,20 @@
 state_abbr: 'IL'
+version: 3.0
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
 time_res: 4  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
-total_demand: 185e6  # Annual MWh in the first year
+# total_demand: 185e6  # Annual MWh in the first year
+total_demand: 136e6  # Annual MWh in the first year
 load_growth: 0.01  # % annual growth
 load_share:
   MISO-Z4: 0.33
   ComEd: 0.67
 
-model_years: [2025, 2030, 2035, 2040, 2045]
-plot_year: 2045
+# model_years: [2025, 2030, 2035, 2040, 2045]
+model_years: [2025]
+plot_year: 2025
 
 co2_limits:
   # 2020: 31.25
@@ -21,8 +24,10 @@ co2_limits:
   # 2040: 6.25
   # 2045: 0.0
 
-solar_years: [2016,2017,2018,2019,2020]  # NSRDB only accepts years 1998-2020
-wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013
+# solar_years: [2016,2017,2018,2019,2020]  # NSRDB only accepts years 1998-2020
+# wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013
+solar_years: [2016]  # NSRDB only accepts years 1998-2020
+wind_years: [2009]  # WTK only goes from 2009-2013
 load_year: 2019
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
@@ -40,15 +45,25 @@ growth_rates:  # MW/year
   Solar: 5e3
   Wind: 5e3
 
+# lifetime:
+#   Nuclear: 80
+#   Biomass: 40
+#   Natural Gas: 40
+#   Coal: 50
+#   Solar: 20
+#   Wind: 20
+#   Batteries: 15
+#   Petroleum: 40
+
 lifetime:
   Nuclear: 80
-  Biomass: 40
-  Natural Gas: 40
-  Coal: 50
+  Biomass: 60
+  Natural Gas: 60
+  Coal: 60
   Solar: 20
   Wind: 20
   Batteries: 15
-  Petroleum: 40
+  Petroleum: 60
 
 atb_params:
     atb_year: 2022  # the ATB publication year
@@ -106,14 +121,14 @@ extendable_techs:  [
       # 'CTAvgCF', 
       # 'IGCCAvgCF', 
       # 'Biopower', 
-      'Land-Based Wind',
-      'Utility PV', 
+      # 'Land-Based Wind',
+      # 'Utility PV', 
       # 'LWR',
       # 'NuclearSMR', 
       # '10Hr Battery Storage', 
       # '8Hr Battery Storage',
       # '6Hr Battery Storage', 
-      '4Hr Battery Storage', 
+      # '4Hr Battery Storage', 
       # '2Hr Battery Storage'
       ]
 

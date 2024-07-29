@@ -115,8 +115,11 @@ def plot_active_units(n):
         },
         axis=1,
     )
+    
+    
     df2 = df2.groupby(n.generators.carrier).sum()
     df = pd.concat([df, df2])
+    color = df2.columns.map(n.carriers.color)
     df.T.plot.bar(
         ax=ax,
         stacked=True,
@@ -126,6 +129,7 @@ def plot_active_units(n):
         xlabel="Investment Period",
         rot=0,
         figsize=(10, 5),
+        # color=color
     )
     plt.tight_layout()
 

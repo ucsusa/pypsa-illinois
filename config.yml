@@ -1,5 +1,6 @@
 state_abbr: 'IL'
-version: 3.0
+version: "3.0-test"
+scenario: "no_growth_no_export"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -7,7 +8,7 @@ time_res: 4  # hours
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
 # total_demand: 185e6  # Annual MWh in the first year
 total_demand: 136e6  # Annual MWh in the first year
-load_growth: 0.01  # % annual growth
+load_growth: 0.00  # % annual growth
 load_share:
   MISO-Z4: 0.33
   ComEd: 0.67
@@ -58,12 +59,12 @@ growth_rates:  # MW/year
 lifetime:
   Nuclear: 80
   Biomass: 60
-  Natural Gas: 60
-  Coal: 60
+  Natural Gas: 40
+  Coal: 50
   Solar: 20
   Wind: 20
   Batteries: 15
-  Petroleum: 60
+  Petroleum: 40
 
 atb_params:
     atb_year: 2022  # the ATB publication year

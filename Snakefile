@@ -5,10 +5,12 @@ env_file = Path("./.env").resolve()
 from dotenv import load_dotenv
 load_dotenv(str(env_file))
 
+results_folder = f"{config['scenario']}_v{config['version']}"
+
 rule targets:
     input:
-        "results/figures/illinois_dispatch.png",
-        "results/networks/illinois_solved.nc"
+        f"results/{results_folder}/figures/illinois_dispatch.png",
+        f"results/{results_folder}/networks/illinois_solved.nc"
     # input:
     #     expand("results/")
 
@@ -84,15 +86,15 @@ rule solve_network:
     input:
         elec_network = "data/networks/electricity_network.nc"
     output:
-        solved_network = "results/networks/illinois_solved.nc"
+        solved_network = f"results/{results_folder}/networks/illinois_solved.nc"
     script: "scripts/solve_network.py"
 
 rule plot_results:
     input:
-        solved_network = "results/networks/illinois_solved.nc"
+        solved_network = f"results/{results_folder}/networks/illinois_solved.nc"
     output: 
-        dispatch_figure = "results/figures/illinois_dispatch.png",
-        capacity_figure = "results/figures/illinois_capacity.png",
-        emissions_figure = "results/figures/illinois_emissions.png",
-        active_units_figure = "results/figures/illinois_active_units.png"
+        dispatch_figure = f"results/{results_folder}/figures/illinois_dispatch.png",
+        capacity_figure = f"results/{results_folder}/figures/illinois_capacity.png",
+        emissions_figure = f"results/{results_folder}/figures/illinois_emissions.png",
+        active_units_figure = f"results/{results_folder}/figures/illinois_active_units.png"
     script: "scripts/plot_results.py"

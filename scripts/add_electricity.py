@@ -254,7 +254,7 @@ def attach_generators(n, costs, generators=None, build_years=None, model_year=No
 
                 # minimum/maximum power output
                 if tech == 'LWR':
-                    p_min_pu = 0.95
+                    p_min_pu = 0
                     p_max_pu = 1.0  
                 else:
                     p_max_pu = 1

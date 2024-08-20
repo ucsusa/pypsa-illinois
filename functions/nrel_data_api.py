@@ -21,7 +21,7 @@ parameters = {'lon':40.09,
               'year':2019,
               'leap_day':'false',
               'selector':'POINT',
-              'utc':'true',
+              'utc':'false',
               'interval':'60',
               'attr_list':['ghi']}
 

@@ -11,7 +11,7 @@ from nrel_data_api import parameters, make_csv_url
 
 model_years = np.array(snakemake.config['model_years']).astype('int')
 
-def handle_datetime(dataframe):
+def handle_datetime(dataframe, use_actual=False):
     """
     Combines time columns into a single timestamp column.
     Expects columns ['year','month','day','hour'].
@@ -22,24 +22,33 @@ def handle_datetime(dataframe):
         A pandas dataframe.
     """
     frame = dataframe.copy()
-    timestamps = pd.DatetimeIndex([])
-    for year in model_years:
-        period = pd.date_range(start=f"{year}-01-01",
-                                        freq=f"1h",
-                                        periods=8760)
-        timestamps = timestamps.append(period)
     
-    frame.index = timestamps
-    try:
-        frame.set_index(timestamps,inplace=True)
-        frame.drop(columns=['Year','Month','Day','Hour','Minute'],inplace=True)
-    except:
-        raise ValueError
+    if use_actual:
+            cols=['Year','Month', 'Day', 'Hour', 'Minute']
+            frame = frame.T.drop_duplicates().T
+            frame['time'] = pd.to_datetime(frame[cols])
+            frame.drop(columns=cols, inplace=True)
+            frame.set_index('time', inplace=True)
+    
+    else:
+        timestamps = pd.DatetimeIndex([])
+        for year in model_years:
+            period = pd.date_range(start=f"{year}-01-01",
+                                            freq=f"1h",
+                                            periods=8760)
+            timestamps = timestamps.append(period)
+        
+        frame.index = timestamps
+        try:
+            frame.set_index(timestamps,inplace=True)
+            frame.drop(columns=['Year','Month','Day','Hour','Minute'],inplace=True)
+        except:
+            raise ValueError
     
     return frame
     
 
-def retrieve_solar_timeseries(region):
+def retrieve_solar_timeseries(region, use_actual=False):
     """
     Retrieves data from NREL's national solar radiation database (NSRDB).
 
@@ -66,17 +75,17 @@ def retrieve_solar_timeseries(region):
             df = pd.read_csv(URL, skiprows=2)[:8760]
             df.rename(columns={'GHI':f"{n}"}, inplace=True)
             frames.append(df)
-    
+            
             solar_df = pd.concat(frames, axis=1)
     
         all_frames.append(solar_df)
     full_df = pd.concat(all_frames, axis=0)
-    full_df = handle_datetime(full_df)
+    full_df = handle_datetime(full_df, use_actual=use_actual)
     
     return full_df
 
 
-def retrieve_wind_timeseries(region):
+def retrieve_wind_timeseries(region, use_actual=False):
     """
     Retrieves data from NREL's national solar radiation database (NSRDB).
 
@@ -109,7 +118,7 @@ def retrieve_wind_timeseries(region):
         wind_df = pd.concat(frames, axis=1)
         all_frames.append(wind_df)
     full_df = pd.concat(all_frames, axis=0)
-    full_df = handle_datetime(full_df)
+    full_df = handle_datetime(full_df, use_actual=use_actual)
     
     return full_df
 
@@ -199,13 +208,14 @@ def process_solar_timeseries(df, normalize=True):
 if __name__ == "__main__":
     
     regions = gpd.read_file(snakemake.input.supply_regions)
+    use_actual = snakemake.config['use_actual']
     
     # solar data
-    df = retrieve_solar_timeseries(regions)
+    df = retrieve_solar_timeseries(regions, use_actual=use_actual)
     df = process_solar_timeseries(df)
     df.to_csv(snakemake.output.solar)
     
     # wind data
-    df = retrieve_wind_timeseries(regions)
+    df = retrieve_wind_timeseries(regions, use_actual=use_actual)
     df = process_wind_timeseries(df)
     df.to_csv(snakemake.output.wind)

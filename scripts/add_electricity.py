@@ -202,7 +202,7 @@ def attach_renewables(
                     try:
                         p_nom = generators.at[bus, tech]
                         build_year = build_years.at[bus, tech]
-                    except BaseException:  # the technology is not included in the list of existing generators
+                    except BaseException:
                         continue
                     name = f"{bus} {tech} EXIST"
                     extendable = False
@@ -251,7 +251,7 @@ def attach_generators(
                     try:
                         p_nom = generators.at[bus, tech]
                         build_year = build_years.at[bus, tech]
-                    except BaseException:  # the technology is not included in the list of existing generators
+                    except BaseException:  
                         continue
                     name = f"{bus} {tech} EXIST"
                     extendable = False
@@ -332,7 +332,7 @@ def attach_storage(
                     try:
                         p_nom = generators.at[bus, tech]
                         build_year = build_years.at[bus, tech]
-                    except BaseException:  # the technology is not included in the list of existing generators
+                    except BaseException:
                         continue
                     name = f"{bus} {tech} EXIST"
                     extendable = False

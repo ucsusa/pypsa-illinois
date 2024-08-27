@@ -81,7 +81,7 @@ if __name__ == "__main__":
                                         slice(None),
                                         price_col),
                                        atb_params['atb_year']].values[0]
-    # $/mmbtu, 2023 average https://www.eia.gov/todayinenergy/detail.php?id=61183#
+    # $/mmbtu, 2023 avg https://www.eia.gov/todayinenergy/detail.php?id=61183#
     naturalgas_price = 2.57
     # naturalgas_price =
 
@@ -115,8 +115,12 @@ if __name__ == "__main__":
             nuclear_cap_cost, nuclear_fixed_om, 0, nuclear_fuel]
 
         # these costs are from 2021 and should be updated to reflect inflation.
-        df_t['Petroleum', 'Petroleum', year] = [1158, 27.94, 1.78, petroleum_price *
-                                                petroleum_heatrate]   # from here https://www.eia.gov/electricity/generatorcosts/
+        # from here https://www.eia.gov/electricity/generatorcosts/
+        df_t['Petroleum', 'Petroleum', year] = [1158, 
+                                                27.94, 
+                                                1.78, 
+                                                (petroleum_price *
+                                                petroleum_heatrate)]   
     df_pivot = df_t.T
 
     df_pivot.fillna(0., inplace=True)

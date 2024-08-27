@@ -251,7 +251,7 @@ def attach_generators(
                     try:
                         p_nom = generators.at[bus, tech]
                         build_year = build_years.at[bus, tech]
-                    except BaseException:  
+                    except BaseException:
                         continue
                     name = f"{bus} {tech} EXIST"
                     extendable = False

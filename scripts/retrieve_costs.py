@@ -116,11 +116,11 @@ if __name__ == "__main__":
 
         # these costs are from 2021 and should be updated to reflect inflation.
         # from here https://www.eia.gov/electricity/generatorcosts/
-        df_t['Petroleum', 'Petroleum', year] = [1158, 
-                                                27.94, 
-                                                1.78, 
+        df_t['Petroleum', 'Petroleum', year] = [1158,
+                                                27.94,
+                                                1.78,
                                                 (petroleum_price *
-                                                petroleum_heatrate)]   
+                                                 petroleum_heatrate)]
     df_pivot = df_t.T
 
     df_pivot.fillna(0., inplace=True)

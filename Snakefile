@@ -96,5 +96,6 @@ rule plot_results:
         dispatch_figure = f"results/{results_folder}/figures/illinois_dispatch.png",
         capacity_figure = f"results/{results_folder}/figures/illinois_capacity.png",
         emissions_figure = f"results/{results_folder}/figures/illinois_emissions.png",
-        active_units_figure = f"results/{results_folder}/figures/illinois_active_units.png"
+        active_units_figure = f"results/{results_folder}/figures/illinois_active_units.png",
+        monthly_generation_figure = f"results/{results_folder}/figures/illinois_monthly_generation.png"
     script: "scripts/plot_results.py"

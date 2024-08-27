@@ -113,6 +113,7 @@ def retrieve_wind_timeseries(region, use_actual=False):
                             kind='wind')
             df = pd.read_csv(URL, skiprows=1)[:8760]
             df.rename(columns={'wind speed at 80m (m/s)':f"{n}"}, inplace=True)
+            df.to_csv(f"data/timeseries/wind/{n}_wind_{year}.csv")
             frames.append(df)
         
         wind_df = pd.concat(frames, axis=1)

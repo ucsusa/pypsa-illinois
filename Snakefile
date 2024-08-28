@@ -19,6 +19,11 @@ rule retrieve_supply_regions:
         supply_regions = "data/spatial_data/supply_regions.shp"
     script: "scripts/retrieve_supply_regions.py"
 
+rule retrieve_fuel_costs:
+    output: 
+        fuel_costs = "data/thermal_fuel_costs.csv"
+    script: "scripts/retrieve_fuel_prices.py"
+
 rule retrieve_costs:
     output: 
         costs = "data/technology_costs.csv"

@@ -31,13 +31,28 @@ def fuel_cost_pivot(dataframe):
     
     return cost_pivot
 
+def prepare_cost_timeseries(df, time_res):
+    
+    dataframe = df.copy()
+    
+    dataframe.index = pd.to_datetime(dataframe.index)
+    # remove NaN values
+    dataframe = dataframe.interpolate()
+    
+    dataframe = dataframe.resample(f'{time_res}h').ffill()
+    
+    return dataframe
 
 if __name__ == "__main__":
     
     state_abbr = snakemake.config['state_abbr']
+    time_res = snakemake.config['time_res']
     
     eia_923m_df = retrieve_eia923m_pudl(state=state_abbr)
     
     fuel_cost_df = fuel_cost_pivot(eia_923m_df)
     
     fuel_cost_df.to_csv(snakemake.output.fuel_costs)
+    
+    fuel_cost_resampled = prepare_cost_timeseries(fuel_cost_df, time_res)
+    fuel_cost_resampled.to_csv(snakemake.output.fuel_cost_timeseries)

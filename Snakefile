@@ -21,7 +21,8 @@ rule retrieve_supply_regions:
 
 rule retrieve_fuel_costs:
     output: 
-        fuel_costs = "data/thermal_fuel_costs.csv"
+        fuel_costs = "data/thermal_fuel_costs.csv",
+        fuel_cost_timeseries = "data/thermal_fuel_cost_ts.csv"
     script: "scripts/retrieve_fuel_prices.py"
 
 rule retrieve_costs:

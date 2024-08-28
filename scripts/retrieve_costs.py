@@ -92,7 +92,6 @@ if __name__ == "__main__":
 
     # converts btu/kwh to mmbtu/mwh
     ng_heatrate = heatrates.at[atb_params['atb_year'], 'Natural Gas'] / 1e3
-    # ng_heatrate =1  # converts btu/kwh to mmbtu/mwh
     coal_heatrate = heatrates.at[atb_params['atb_year'], 'Coal'] / 1e3
     petroleum_heatrate = heatrates.at[atb_params['atb_year'],
                                       'Petroleum'] / 1e3
@@ -126,3 +125,4 @@ if __name__ == "__main__":
     df_pivot.fillna(0., inplace=True)
 
     df_pivot.to_csv(snakemake.output.costs)
+    heatrates.to_csv(snakemake.output.heatrates)

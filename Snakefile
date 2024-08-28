@@ -26,7 +26,8 @@ rule retrieve_fuel_costs:
 
 rule retrieve_costs:
     output: 
-        costs = "data/technology_costs.csv"
+        costs = "data/technology_costs.csv",
+        heatrates = "data/heatrates.csv"
     script: "scripts/retrieve_costs.py"
 
 rule retrieve_load:

@@ -19,17 +19,19 @@ rule retrieve_supply_regions:
         supply_regions = "data/spatial_data/supply_regions.shp"
     script: "scripts/retrieve_supply_regions.py"
 
-rule retrieve_fuel_costs:
-    output: 
-        fuel_costs = "data/thermal_fuel_costs.csv",
-        fuel_cost_timeseries = "data/thermal_fuel_cost_ts.csv"
-    script: "scripts/retrieve_fuel_prices.py"
-
 rule retrieve_costs:
     output: 
         costs = "data/technology_costs.csv",
         heatrates = "data/heatrates.csv"
     script: "scripts/retrieve_costs.py"
+
+rule retrieve_fuel_costs:
+    input:
+        heatrates = "data/heatrates.csv"
+    output: 
+        fuel_costs = "data/thermal_fuel_costs.csv",
+        fuel_cost_timeseries = "data/thermal_fuel_cost_ts.csv"
+    script: "scripts/retrieve_fuel_prices.py"
 
 rule retrieve_load:
     output:
@@ -79,6 +81,7 @@ rule add_electricity:
         load = "data/time_series/load.csv",
         generators = "data/aggregated_generators.csv",
         costs = "data/technology_costs.csv",
+        fuel_cost_timeseries = "data/thermal_fuel_cost_ts.csv",
         wind_profile = "data/time_series/wind.csv",
         solar_profile = "data/time_series/solar.csv",
         base_network = "data/networks/base_network.nc",

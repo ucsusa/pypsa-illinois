@@ -1,5 +1,9 @@
 import pandas as pd
 from nrelpy.atb import ATBe
+import sys
+
+sys.path.append("functions")
+from data_functions import load_heatrates
 
 n_illinois_reactors = 11
 total_lwr_capacity = 12415.1
@@ -67,8 +71,7 @@ if __name__ == "__main__":
     fuel_prices = pd.read_html(prices_url)[1].set_index(
         pd.Series(range(2012, 2023))).T
 
-    heatrate_url = "https://www.eia.gov/electricity/annual/html/epa_08_01.html"
-    heatrates = pd.read_html(heatrate_url)[1].set_index("Year")
+    heatrates = load_heatrates()
 
     price_col = 'Average Cost (Dollars per MMBtu)'
 

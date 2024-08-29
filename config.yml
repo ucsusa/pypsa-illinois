@@ -1,6 +1,6 @@
 state_abbr: 'IL'
 version: "1.0-test"
-scenario: "no_growth_with_export"
+scenario: "model_validation"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -30,7 +30,7 @@ co2_limits:
 solar_years: [2016]  # NSRDB only accepts years 1998-2020
 wind_years: [2009]  # WTK only goes from 2009-2013
 load_year: 2019
-fuel_cost_year: [2019]
+fuel_cost_year: 2023
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']

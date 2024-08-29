@@ -13,6 +13,7 @@ scale = snakemake.config['geo_res']
 idx_opts = {"rto": "balancing_authority_code",
             "county": "county"}
 growth_rates = snakemake.config['growth_rates']
+pudl_year = int(snakemake.config['fuel_cost_year'])
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -67,6 +68,13 @@ def load_costs():
 
     return costs
 
+def load_costs_ts():
+    
+    fuel_costs = pd.read_csv(snakemake.input.fuel_cost_timeseries,
+                        parse_dates=True,
+                        index_col=['report_date'])
+
+    return fuel_costs
 
 def load_existing_generators():
     generators = pd.read_csv(snakemake.input.generators,
@@ -235,7 +243,8 @@ def attach_generators(
         costs,
         generators=None,
         build_years=None,
-        model_year=None):
+        model_year=None,
+        costs_ts=None):
     carriers = ['Natural Gas', 'Biomass', 'Coal', 'Nuclear', 'Petroleum']
     for bus in n.buses.index:
         for item in costs.itertuples():
@@ -291,6 +300,20 @@ def attach_generators(
                 else:
                     p_max_pu = 1
                     p_min_pu = 0
+                    
+                # time series marginal costs
+                if ((tech in ['CTAvgCF', 'CCAvgCF', 'IGCCAvgCF'])
+                    and isinstance(costs_ts, pd.DataFrame)):
+                    
+                    # select year to replicate
+                    cost_data = costs_ts.loc[str(pudl_year), carrier].values
+                    
+                    # get the VOM cost
+                    cost_data = cost_data + item.VOM
+                    
+                    marginal_cost = np.tile(cost_data, len(model_years))
+                else:
+                    marginal_cost = item.marginal_cost
 
                 n.add(class_name="Generator",
                       name=name,
@@ -302,7 +325,7 @@ def attach_generators(
                       p_max_pu=p_max_pu,
                       carrier=carrier,
                       capital_cost=item.capital_cost,
-                      marginal_cost=item.marginal_cost,
+                      marginal_cost=marginal_cost,
                       lifetime=item.lifetime,
                       ramp_limit_down=ramp_limit_down,
                       ramp_limit_up=ramp_limit_up,
@@ -364,7 +387,6 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
     costs = load_costs()
-
     costs.to_csv("data/final_costs.csv")
     current_costs = costs.xs((slice(None), slice(None), 2020))
     current_costs = current_costs.reset_index()
@@ -374,6 +396,7 @@ if __name__ == "__main__":
     generators = load_existing_generators()
     build_years = load_build_years()
     emissions = load_emissions()
+    costs_ts = load_costs_ts()
 
     attach_load(n)
     add_carriers(n,
@@ -389,7 +412,8 @@ if __name__ == "__main__":
     attach_generators(n,
                       costs=current_costs,
                       generators=generators,
-                      build_years=build_years
+                      build_years=build_years,
+                      costs_ts=costs_ts
                       )
     attach_storage(n,
                    costs=current_costs,
@@ -408,7 +432,8 @@ if __name__ == "__main__":
                           )
         attach_generators(n,
                           costs=current_costs,
-                          model_year=year
+                          model_year=year,
+                          costs_ts=costs_ts
                           )
         attach_storage(n,
                        costs=current_costs,

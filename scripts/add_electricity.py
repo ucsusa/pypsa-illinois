@@ -68,13 +68,15 @@ def load_costs():
 
     return costs
 
+
 def load_costs_ts():
-    
+
     fuel_costs = pd.read_csv(snakemake.input.fuel_cost_timeseries,
-                        parse_dates=True,
-                        index_col=['report_date'])
+                             parse_dates=True,
+                             index_col=['report_date'])
 
     return fuel_costs
+
 
 def load_existing_generators():
     generators = pd.read_csv(snakemake.input.generators,
@@ -300,17 +302,17 @@ def attach_generators(
                 else:
                     p_max_pu = 1
                     p_min_pu = 0
-                    
+
                 # time series marginal costs
                 if ((tech in ['CTAvgCF', 'CCAvgCF', 'IGCCAvgCF'])
-                    and isinstance(costs_ts, pd.DataFrame)):
-                    
+                        and isinstance(costs_ts, pd.DataFrame)):
+
                     # select year to replicate
                     cost_data = costs_ts.loc[str(pudl_year), carrier].values
-                    
+
                     # get the VOM cost
                     cost_data = cost_data + item.VOM
-                    
+
                     marginal_cost = np.tile(cost_data, len(model_years))
                 else:
                     marginal_cost = item.marginal_cost

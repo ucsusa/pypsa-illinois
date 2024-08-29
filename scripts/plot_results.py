@@ -11,10 +11,11 @@ TECH_ORDER = ['Nuclear',
               'Solar',
               'Wind']
 
+
 def power_by_carrier(n):
     p_by_carrier = n.generators_t.p.T.groupby(
         n.generators.carrier).sum().T
-    
+
     return p_by_carrier
 
 
@@ -34,9 +35,9 @@ def plot_dispatch(n, year=2025, month=7):
     y_min = -n.storage_units_t.p_store.max().max() / 1e3
     y_max = n.loads_t.p_set.sum(axis=1).max() / 1e3
     margin = 0.1
-    y_low = (1+margin) * y_min
-    y_high = (1+margin) * y_max
-    
+    y_low = (1 + margin) * y_min
+    y_high = (1 + margin) * y_max
+
     fig, ax = plt.subplots(figsize=(12, 6))
 
     color = p_by_carrier.columns.map(n.carriers.color)
@@ -45,7 +46,7 @@ def plot_dispatch(n, year=2025, month=7):
         ax=ax,
         linewidth=0,
         color=color,
-        ylim=(y_low-margin, y_high+margin)
+        ylim=(y_low - margin, y_high + margin)
     )
 
     charge = p_by_carrier.where(
@@ -58,7 +59,7 @@ def plot_dispatch(n, year=2025, month=7):
             ax=ax,
             linewidth=0,
             color=charge.columns.map(n.carriers.color),
-            ylim=(y_low-margin,y_high+margin)
+            ylim=(y_low - margin, y_high + margin)
         )
 
     n.loads_t.p_set.sum(axis=1).loc[time].div(1e3).plot(ax=ax, c="k")
@@ -162,26 +163,26 @@ def plot_active_units(n):
 
     return fig, ax
 
+
 def plot_monthly_generation(n, time_res):
-    p_by_carrier = power_by_carrier(n) * time_res 
-    
+    p_by_carrier = power_by_carrier(n) * time_res
+
     p_by_carrier = p_by_carrier.resample('ME', level='timestep').sum()
-    
+
     p_by_carrier = p_by_carrier[TECH_ORDER]
-    
+
     color = p_by_carrier.columns.map(n.carriers.color)
-    
-    
+
     fig, ax = plt.subplots(figsize=(12, 8))
-    p_by_carrier.plot.area(ax=ax, 
+    p_by_carrier.plot.area(ax=ax,
                            color=color,
                            fontsize=16)
-    
+
     ax.set_xlabel('')
     ax.set_ylabel('Generation [MWh]', fontsize=18)
     return fig, ax
-   
-    
+
+
 if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.solved_network)
@@ -193,13 +194,12 @@ if __name__ == "__main__":
     fig, ax = plot_capacity(n)
     plt.savefig(snakemake.output.capacity_figure)
 
-
     time_res = float(snakemake.config['time_res'])
     fig, ax = plot_emissions(n, time_res)
     plt.savefig(snakemake.output.emissions_figure)
 
     fig, ax = plot_active_units(n)
     plt.savefig(snakemake.output.active_units_figure)
-    
+
     fig, ax = plot_monthly_generation(n, time_res)
     plt.savefig(snakemake.output.monthly_generation_figure)

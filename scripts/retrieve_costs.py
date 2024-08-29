@@ -1,9 +1,11 @@
-from data_functions import load_heatrates
+import numpy as np
 import pandas as pd
 from nrelpy.atb import ATBe
 import sys
 
 sys.path.append("functions")
+from data_functions import load_heatrates
+
 
 n_illinois_reactors = 11
 total_lwr_capacity = 12415.1

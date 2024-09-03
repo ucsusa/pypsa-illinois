@@ -1,6 +1,6 @@
 state_abbr: 'IL'
 version: "1.0-test"
-scenario: "model_validation"
+scenario: "wind_cf"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -111,6 +111,7 @@ turbine_params:
   diameter: 103 # m
   rated_power: 2.75  # MW
   air_density: 1.225  # kg/m^3
+  capacity_factor: 0.35  # average annual capacity factor
 
 nuclear_params:  # for existing reactors, 2023 NEI costs in context
   capacity_factor: 0.972

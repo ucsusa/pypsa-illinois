@@ -14,6 +14,7 @@ idx_opts = {"rto": "balancing_authority_code",
             "county": "county"}
 growth_rates = snakemake.config['growth_rates']
 pudl_year = int(snakemake.config['fuel_cost_year'])
+wind_cf = float(snakemake.config['turbine_params']['capacity_factor'])
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -456,5 +457,14 @@ if __name__ == "__main__":
         # else:
         except (AttributeError, KeyError, TypeError):
             pass
+        
+        
+        
+    # modify wind capacity factor
+    wind_gen = n.generators[n.generators.carrier=='Wind'].index
+    n.generators_t.p_max_pu.loc[:,wind_gen] = ((n.generators_t.p_max_pu[wind_gen]/
+                                                (n.generators_t.p_max_pu[wind_gen].sum()
+                                                 /len(n.snapshots))
+                                                *wind_cf))
 
     n.export_to_netcdf(snakemake.output.elec_network)

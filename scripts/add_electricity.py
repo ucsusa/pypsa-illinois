@@ -15,7 +15,7 @@ idx_opts = {"rto": "balancing_authority_code",
 growth_rates = snakemake.config['growth_rates']
 pudl_year = int(snakemake.config['fuel_cost_year'])
 wind_cf = float(snakemake.config['turbine_params']['capacity_factor'])
-retirements_df = pd.DataFrame(config['retirements']).fillna(0)
+retirements_df = pd.DataFrame(snakemake.config['retirements']).fillna(0)
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -392,8 +392,8 @@ def add_retirements(n):
     carriers = retirements_df.columns
     
     df = retirements_df.loc[model_years, :].cumsum()
-    
-    c_by_carrier = n.generators.groupby('carrier').sum().loc[carriers:, 'p_nom']
+    # breakpoint()
+    c_by_carrier = n.generators.groupby('carrier').sum().loc[carriers, 'p_nom']
     
     for carrier in carriers:
         existing_cap = c_by_carrier.loc[carrier]

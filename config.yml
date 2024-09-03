@@ -6,7 +6,7 @@ solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
 time_res: 1  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
-total_demand: 164e6  # Annual MWh in the first year
+total_demand: 185e6  # Annual MWh in the first year
 # total_demand: 136e6  # Annual MWh in the first year
 load_growth: 0.00  # % annual growth
 load_share:
@@ -29,8 +29,8 @@ co2_limits:
 # wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013
 solar_years: [2016]  # NSRDB only accepts years 1998-2020
 wind_years: [2009]  # WTK only goes from 2009-2013
-load_year: 2023
-fuel_cost_year: 2023
+load_year: 2019
+fuel_cost_year: 2019
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']

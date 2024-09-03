@@ -10,7 +10,8 @@ results_folder = f"{config['scenario']}_v{config['version']}"
 rule targets:
     input:
         f"results/{results_folder}/figures/illinois_dispatch.png",
-        f"results/{results_folder}/networks/illinois_solved.nc"
+        f"results/{results_folder}/networks/illinois_solved.nc",
+        f"dag.png"
     # input:
     #     expand("results/")
 
@@ -109,3 +110,10 @@ rule plot_results:
         active_units_figure = f"results/{results_folder}/figures/illinois_active_units.png",
         monthly_generation_figure = f"results/{results_folder}/figures/illinois_monthly_generation.png"
     script: "scripts/plot_results.py"
+
+rule build_dag:
+    input: "Snakefile"
+    output:
+        "dag.png"
+    shell:
+        "snakemake --dag | dot -Tpng > {output}"

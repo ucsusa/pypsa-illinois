@@ -25,6 +25,21 @@ co2_limits:
   # 2040: 6.25
   # 2045: 0.0
 
+retirements: # need to have every modeled year, at least
+  Natural Gas: 
+    2025:
+    2030: 7445.50
+    2035:
+    2040:
+    2045:
+  Coal: 
+    2025:
+    2030: 4981.60
+    2035:
+    2040:
+    2045:
+
+
 # solar_years: [2016,2017,2018,2019,2020]  # NSRDB only accepts years 1998-2020
 # wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013
 solar_years: [2016]  # NSRDB only accepts years 1998-2020

@@ -1,13 +1,13 @@
 state_abbr: 'IL'
-version: "5.0-test"
-scenario: "no_growth_no_export"
+version: "1.0-test"
+scenario: "wind_cf"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
-time_res: 4  # hours 
+time_res: 1  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
-# total_demand: 185e6  # Annual MWh in the first year
-total_demand: 136e6  # Annual MWh in the first year
+total_demand: 185e6  # Annual MWh in the first year
+# total_demand: 136e6  # Annual MWh in the first year
 load_growth: 0.00  # % annual growth
 load_share:
   MISO-Z4: 0.33
@@ -30,6 +30,7 @@ co2_limits:
 solar_years: [2016]  # NSRDB only accepts years 1998-2020
 wind_years: [2009]  # WTK only goes from 2009-2013
 load_year: 2019
+fuel_cost_year: 2019
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']
@@ -110,6 +111,7 @@ turbine_params:
   diameter: 103 # m
   rated_power: 2.75  # MW
   air_density: 1.225  # kg/m^3
+  capacity_factor: 0.35  # average annual capacity factor
 
 nuclear_params:  # for existing reactors, 2023 NEI costs in context
   capacity_factor: 0.972

@@ -1,5 +1,11 @@
+import numpy as np
 import pandas as pd
 from nrelpy.atb import ATBe
+import sys
+
+sys.path.append("functions")
+from data_functions import load_heatrates
+
 
 n_illinois_reactors = 11
 total_lwr_capacity = 12415.1
@@ -67,8 +73,7 @@ if __name__ == "__main__":
     fuel_prices = pd.read_html(prices_url)[1].set_index(
         pd.Series(range(2012, 2023))).T
 
-    heatrate_url = "https://www.eia.gov/electricity/annual/html/epa_08_01.html"
-    heatrates = pd.read_html(heatrate_url)[1].set_index("Year")
+    heatrates = load_heatrates()
 
     price_col = 'Average Cost (Dollars per MMBtu)'
 
@@ -92,7 +97,6 @@ if __name__ == "__main__":
 
     # converts btu/kwh to mmbtu/mwh
     ng_heatrate = heatrates.at[atb_params['atb_year'], 'Natural Gas'] / 1e3
-    # ng_heatrate =1  # converts btu/kwh to mmbtu/mwh
     coal_heatrate = heatrates.at[atb_params['atb_year'], 'Coal'] / 1e3
     petroleum_heatrate = heatrates.at[atb_params['atb_year'],
                                       'Petroleum'] / 1e3
@@ -126,3 +130,4 @@ if __name__ == "__main__":
     df_pivot.fillna(0., inplace=True)
 
     df_pivot.to_csv(snakemake.output.costs)
+    heatrates.to_csv(snakemake.output.heatrates)

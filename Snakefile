@@ -21,8 +21,17 @@ rule retrieve_supply_regions:
 
 rule retrieve_costs:
     output: 
-        costs = "data/technology_costs.csv"
+        costs = "data/technology_costs.csv",
+        heatrates = "data/heatrates.csv"
     script: "scripts/retrieve_costs.py"
+
+rule retrieve_fuel_costs:
+    input:
+        heatrates = "data/heatrates.csv"
+    output: 
+        fuel_costs = "data/thermal_fuel_costs.csv",
+        fuel_cost_timeseries = "data/thermal_fuel_cost_ts.csv"
+    script: "scripts/retrieve_fuel_prices.py"
 
 rule retrieve_load:
     output:
@@ -72,6 +81,7 @@ rule add_electricity:
         load = "data/time_series/load.csv",
         generators = "data/aggregated_generators.csv",
         costs = "data/technology_costs.csv",
+        fuel_cost_timeseries = "data/thermal_fuel_cost_ts.csv",
         wind_profile = "data/time_series/wind.csv",
         solar_profile = "data/time_series/solar.csv",
         base_network = "data/networks/base_network.nc",
@@ -96,5 +106,6 @@ rule plot_results:
         dispatch_figure = f"results/{results_folder}/figures/illinois_dispatch.png",
         capacity_figure = f"results/{results_folder}/figures/illinois_capacity.png",
         emissions_figure = f"results/{results_folder}/figures/illinois_emissions.png",
-        active_units_figure = f"results/{results_folder}/figures/illinois_active_units.png"
+        active_units_figure = f"results/{results_folder}/figures/illinois_active_units.png",
+        monthly_generation_figure = f"results/{results_folder}/figures/illinois_monthly_generation.png"
     script: "scripts/plot_results.py"

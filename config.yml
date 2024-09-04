@@ -1,6 +1,6 @@
 state_abbr: 'IL'
-version: "1.0-test"
-scenario: "energy_constraint"
+version: "3.0"
+scenario: "export_and_growth_0pct"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -9,9 +9,7 @@ load_filter: 60e3  # MW, load above this level will be removed as outliers.
 total_demand: 185e6  # Annual MWh in the first year
 # total_demand: 136e6  # Annual MWh in the first year
 load_growth: 0.00  # % annual growth
-load_share:
-  MISO-Z4: 0.33
-  ComEd: 0.67
+random_seed: 1234
 
 model_years: [2025, 2030, 2035, 2040, 2045]
 # model_years: [2025]
@@ -31,11 +29,11 @@ retirements: # need to have every modeled year, at least
     2030: 7445.50
     2035:
     2040:
-    2045:
+    2045: 11459.7
   Coal: 
     2025:
     2030: 4981.60
-    2035:
+    2035: 2433.40
     2040:
     2045:
 

@@ -400,7 +400,7 @@ def add_retirements(n):
         for year in model_years:
             try:
                 retirement = df.loc[year, carrier]
-                remaining = existing_cap - retirement
+                remaining = max(existing_cap - retirement, 0)
                 
                 limit = remaining * len(n.snapshots)
                 
@@ -497,6 +497,6 @@ if __name__ == "__main__":
     # modify wind capacity factor
     wind_gen = n.generators[n.generators.carrier == 'Wind'].index
     n.generators_t.p_max_pu.loc[:, wind_gen] = ((n.generators_t.p_max_pu[wind_gen] / (
-        n.generators_t.p_max_pu[wind_gen].sum() / len(n.snapshots)) * wind_cf))
+        n.generators_t.p_max_pu[wind_gen].sum() / (len(n.snapshots))) * wind_cf))
 
     n.export_to_netcdf(snakemake.output.elec_network)

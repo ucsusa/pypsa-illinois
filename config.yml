@@ -1,5 +1,5 @@
 state_abbr: 'IL'
-version: "7.0"
+version: "8.0"
 scenario: "export_and_growth_0pct"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
@@ -39,11 +39,14 @@ retirements: # need to have every modeled year, at least
 
 capacity_max:
   Solar:
-    2025: 1693
+    # 2025: 1693
+    2025: 461
   Wind:
-    2025: 8700
+    # 2025: 8700
+    2025: 798
   Batteries:
-    2025: 114
+    # 2025: 114
+    2025: 18
 
 solar_years: [2016,2017,2018,2019,2020]  # NSRDB only accepts years 1998-2020
 wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013

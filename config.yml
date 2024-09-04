@@ -1,5 +1,5 @@
 state_abbr: 'IL'
-version: "6.0"
+version: "7.0"
 scenario: "export_and_growth_0pct"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'

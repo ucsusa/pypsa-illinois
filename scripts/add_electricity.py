@@ -423,12 +423,12 @@ def add_capacity_max(n):
     carriers = capacity_limits_df.columns
     
     df = capacity_limits_df.copy()
-    breakpoint()
+    n_buses = n.buses.shape[0]
     
     for carrier in carriers:
         for year in df.index:
             try:
-                limit = df.loc[year, carrier]                
+                limit = df.loc[year, carrier] / n_buses
                 n.add(class_name="GlobalConstraint",
                         name=f'{carrier} Capacity Limit {year}',
                         sense='<=',

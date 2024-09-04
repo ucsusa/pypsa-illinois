@@ -1,5 +1,5 @@
 state_abbr: 'IL'
-version: "5.0"
+version: "6.0"
 scenario: "export_and_growth_0pct"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
@@ -37,6 +37,13 @@ retirements: # need to have every modeled year, at least
     2040:
     2045:
 
+capacity_max:
+  Solar:
+    2025: 1693
+  Wind:
+    2025: 8700
+  Batteries:
+    2025: 114
 
 solar_years: [2016,2017,2018,2019,2020]  # NSRDB only accepts years 1998-2020
 wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013
@@ -50,15 +57,15 @@ region_names: ['MISO-Z4','ComEd']
 
 discount_rate: 0.07
 
-growth_rates:  # MW/year
-  Nuclear: 1e3
-  Biomass: 1e3
-  Natural Gas: 10e3
-  Coal: 10e3
-  Petroleum: 10e3
-  Batteries: 2.5e3
-  Solar: 2.5e3
-  Wind: 2.5e3
+growth_rates:  # MW/year -- make it infinite for now.
+  Nuclear: 1e10
+  Biomass: 1e10
+  Natural Gas: 10e10
+  Coal: 10e10
+  Petroleum: 10e10
+  Batteries: 2.5e10
+  Solar: 2.5e10
+  Wind: 2.5e10
 
 # lifetime:
 #   Nuclear: 80

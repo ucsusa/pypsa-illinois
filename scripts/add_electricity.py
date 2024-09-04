@@ -402,7 +402,7 @@ def add_retirements(n):
                 retirement = df.loc[year, carrier]
                 remaining = max(existing_cap - retirement, 0)
                 
-                limit = remaining * len(n.snapshots)
+                limit = remaining * (8760/resolution)
                 
                 n.add(class_name="GlobalConstraint",
                         name=f'{carrier} limit {year}',

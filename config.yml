@@ -1,5 +1,5 @@
 state_abbr: 'IL'
-version: "4.0"
+version: "5.0"
 scenario: "export_and_growth_0pct"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
@@ -56,9 +56,9 @@ growth_rates:  # MW/year
   Natural Gas: 10e3
   Coal: 10e3
   Petroleum: 10e3
-  Batteries: 5e3
-  Solar: 5e3
-  Wind: 5e3
+  Batteries: 2.5e3
+  Solar: 2.5e3
+  Wind: 2.5e3
 
 # lifetime:
 #   Nuclear: 80

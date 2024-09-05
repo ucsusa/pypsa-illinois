@@ -173,16 +173,22 @@ def plot_monthly_generation(n, time_res, model_years):
 
     color = p_by_carrier.columns.map(n.carriers.color)
 
-    fig, ax = plt.subplots(1,len(model_years), figsize=(16, 8), sharey=True)
-    for i, year in enumerate(model_years):
-        p_by_carrier.loc[str(year)].plot.area(ax=ax[i],
+    if len(model_years) > 1:
+        fig, ax = plt.subplots(1,len(model_years), figsize=(16, 8), sharey=True)
+        for i, year in enumerate(model_years):
+            p_by_carrier.loc[str(year)].plot.area(ax=ax[i],
+                                    color=color,
+                                    fontsize=16, )
+
+            ax[i].set_xlabel('')
+
+        plt.tight_layout()
+        plt.subplots_adjust(wspace=0, hspace=0)
+    else:
+        fig, ax = plt.subplots(figsize=(12,8))
+        p_by_carrier.plot.area(ax=ax,
                                 color=color,
                                 fontsize=16, )
-
-        ax[i].set_xlabel('')
-
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0, hspace=0)
     return fig, ax
 
 

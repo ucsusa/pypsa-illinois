@@ -502,7 +502,7 @@ if __name__ == "__main__":
 
 
     # add energy constraints
-    add_retirements(n)
+    # add_retirements(n)
     
     # add capacity constraints
     add_capacity_max(n)

@@ -300,7 +300,7 @@ def attach_generators(
 
                 # minimum/maximum power output
                 if tech == 'LWR':
-                    p_min_pu = 0.9
+                    p_min_pu = 0.0
                     p_max_pu = 1.0
                 else:
                     p_max_pu = 1

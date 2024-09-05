@@ -1,13 +1,13 @@
 state_abbr: 'IL'
-version: "8.0"
+version: "9.0"
 scenario: "export_and_growth_0pct"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
 time_res: 4  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
-total_demand: 185e6  # Annual MWh in the first year
-# total_demand: 136e6  # Annual MWh in the first year
+# total_demand: 185e6  # Annual MWh in the first year
+total_demand: 136e6  # Annual MWh in the first year
 load_growth: 0.00  # % annual growth
 random_seed: 1234
 
@@ -60,25 +60,15 @@ region_names: ['MISO-Z4','ComEd']
 
 discount_rate: 0.07
 
-growth_rates:  # MW/year -- make it infinite for now.
-  Nuclear: 1e10
-  Biomass: 1e10
-  Natural Gas: 10e10
-  Coal: 10e10
-  Petroleum: 10e10
-  Batteries: 2.5e10
-  Solar: 2.5e10
-  Wind: 2.5e10
-
-# lifetime:
-#   Nuclear: 80
-#   Biomass: 40
-#   Natural Gas: 40
-#   Coal: 50
-#   Solar: 20
-#   Wind: 20
-#   Batteries: 15
-#   Petroleum: 40
+growth_rates:  # MW/year
+  Nuclear: 1e3
+  Biomass: 1e3
+  Natural Gas: 10e3
+  Coal: 10e3
+  Petroleum: 10e3
+  Batteries: 2.5e3
+  Solar: 2.5e3
+  Wind: 2.5e3
 
 lifetime:
   Nuclear: 80

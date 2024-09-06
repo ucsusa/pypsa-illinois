@@ -5,7 +5,10 @@ env_file = Path("./.env").resolve()
 from dotenv import load_dotenv
 load_dotenv(str(env_file))
 
-results_folder = f"{config['scenario']}_v{config['version']}"
+if config['myopic']:
+    results_folder = f"{config['scenario']}_v{config['version']}_myopic"
+else:
+    results_folder = f"{config['scenario']}_v{config['version']}"
 
 rule targets:
     input:

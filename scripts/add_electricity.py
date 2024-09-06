@@ -6,7 +6,6 @@ import geopandas as gpd
 from tqdm import tqdm
 import pypsa
 
-version = 22
 model_years = np.array(snakemake.config['model_years']).astype('int')
 resolution = int(snakemake.config['time_res'])
 scale = snakemake.config['geo_res']
@@ -15,8 +14,15 @@ idx_opts = {"rto": "balancing_authority_code",
 growth_rates = snakemake.config['growth_rates']
 pudl_year = int(snakemake.config['fuel_cost_year'])
 wind_cf = float(snakemake.config['turbine_params']['capacity_factor'])
-retirements_df = pd.DataFrame(snakemake.config['retirements']).fillna(0)
-capacity_limits_df = pd.DataFrame(snakemake.config['capacity_max']).fillna(0)
+try: 
+    retirements_df = pd.DataFrame(snakemake.config['retirements']).fillna(0)
+except:
+    retirements_df = None
+    
+try:
+    capacity_limits_df = pd.DataFrame(snakemake.config['capacity_max']).fillna(0)
+except:
+    capacity_limits_df = None
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -389,56 +395,58 @@ def attach_storage(
 
 
 def add_retirements(n):
-    
-    carriers = retirements_df.columns
-    
-    df = retirements_df.loc[model_years, :].cumsum()
-    c_by_carrier = n.generators.groupby('carrier').sum().loc[carriers, 'p_nom']
-    
-    for carrier in carriers:
-        existing_cap = c_by_carrier.loc[carrier]
-        for year in model_years:
-            try:
-                retirement = df.loc[year, carrier]
-                remaining = max(existing_cap - retirement, 0)
+    if isinstance(retirements_df, pd.DataFrame):
+        
+        carriers = retirements_df.columns
+        
+        df = retirements_df.loc[model_years, :].cumsum()
+        c_by_carrier = n.generators.groupby('carrier').sum().loc[carriers, 'p_nom']
+        
+        for carrier in carriers:
+            existing_cap = c_by_carrier.loc[carrier]
+            for year in model_years:
+                try:
+                    retirement = df.loc[year, carrier]
+                    remaining = max(existing_cap - retirement, 0)
+                    
+                    limit = remaining * (8760/resolution)
+                    
+                    n.add(class_name="GlobalConstraint",
+                            name=f'{carrier} Energy Limit {year}',
+                            sense='<=',
+                            carrier_attribute=carrier,
+                            constant=limit,
+                            type='operational_limit',
+                            investment_period=year,
+                            )
+                except (AttributeError, KeyError, TypeError):
+                    pass
                 
-                limit = remaining * (8760/resolution)
-                
-                n.add(class_name="GlobalConstraint",
-                        name=f'{carrier} Energy Limit {year}',
-                        sense='<=',
-                        carrier_attribute=carrier,
-                        constant=limit,
-                        type='operational_limit',
-                        investment_period=year,
-                        )
-            except (AttributeError, KeyError, TypeError):
-                pass
-            
     return
 
 
 def add_capacity_max(n):
-    
-    carriers = capacity_limits_df.columns
-    
-    df = capacity_limits_df.copy()
-    n_buses = n.buses.shape[0]
-    
-    for carrier in carriers:
-        for year in df.index:
-            try:
-                limit = df.loc[year, carrier] / n_buses
-                n.add(class_name="GlobalConstraint",
-                        name=f'{carrier} Capacity Limit {year}',
-                        sense='<=',
-                        carrier_attribute=carrier,
-                        constant=limit,
-                        type='tech_capacity_expansion_limit',
-                        investment_period=year,
-                        )
-            except (AttributeError, KeyError, TypeError):
-                pass
+    if isinstance(capacity_limits_df, pd.DataFrame):
+        
+        carriers = capacity_limits_df.columns
+        
+        df = capacity_limits_df.copy()
+        n_buses = n.buses.shape[0]
+        
+        for carrier in carriers:
+            for year in df.index:
+                try:
+                    limit = df.loc[year, carrier] / n_buses
+                    n.add(class_name="GlobalConstraint",
+                            name=f'{carrier} Capacity Limit {year}',
+                            sense='<=',
+                            carrier_attribute=carrier,
+                            constant=limit,
+                            type='tech_capacity_expansion_limit',
+                            investment_period=year,
+                            )
+                except (AttributeError, KeyError, TypeError):
+                    pass
             
     return
     
@@ -502,7 +510,7 @@ if __name__ == "__main__":
 
 
     # add energy constraints
-    # add_retirements(n)
+    add_retirements(n)
     
     # add capacity constraints
     add_capacity_max(n)

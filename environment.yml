@@ -1,47 +1,69 @@
 name: pypsa-illinois
 channels:
-    - conda-forge
-    - bioconda
+- conda-forge
+- bioconda
 dependencies:
-    # Requirements for core model functionality
-    - python==3.10.13
-    - pip
-    - ipython
-    - ipykernel
-    
-    - matplotlib
-    - pandas
-    - geopandas
-    - numpy
-    - scipy
+- python<3.12
+- pip
 
-    - jupyter
-    - jupyterlab
-    - seaborn
-    - pypsa
-    - plotly
-    - pyarrow
-    - iprogress
-    - pyogrio
-    - fiona
-    - spyder-kernels=2.5
-    - unyt
-    - cartopy
-    - descartes
-    - lxml
-    - snakemake
-    - pycountry
-    - yaml
-    - geopy
-    - tqdm
-    - graphviz
-    - networkx
-    - pytz
-    - camelot-py
-    - pip:
-      - git+https://github.com/kmax12/gridstatus.git
-      - python-dotenv
-      - highspy
-      - nrelpy
-      - us
-      - census
+- atlite>=0.2.9
+- pypsa>=0.3
+- linopy
+- dask
+
+  # Dependencies of the workflow itself
+- xlrd
+- openpyxl!=3.1.1
+- seaborn
+- snakemake-minimal>=8.14
+- memory_profiler
+- yaml
+- pytables
+- lxml
+- powerplantmatching>=0.5.15
+- numpy
+- pandas>=2.1
+- geopandas>=1
+- xarray>=2023.11.0
+- rioxarray
+- netcdf4
+- networkx
+- scipy
+- glpk
+- shapely>=2.0
+- pyscipopt
+- unyt
+- matplotlib
+- proj
+- fiona
+- country_converter
+- geopy
+- tqdm
+- pytz
+- jpype1
+- pyxlsb
+- graphviz
+- pre-commit
+- geojson
+
+  # Keep in conda environment when calling ipython
+- ipython
+
+  # GIS dependencies:
+- cartopy
+- descartes
+- rasterio!=1.2.10
+
+
+- pip:
+  - tsam>=2.3.1
+  - snakemake-storage-plugin-http
+  - snakemake-executor-plugin-slurm
+  - snakemake-executor-plugin-cluster-generic
+  - highspy
+  - tabula-py
+  - git+https://github.com/kmax12/gridstatus.git
+  - python-dotenv
+  - nrelpy
+  - us
+  - census

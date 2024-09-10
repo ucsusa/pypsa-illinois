@@ -306,7 +306,7 @@ def attach_generators(
 
                 # minimum/maximum power output
                 if tech == 'LWR':
-                    p_min_pu = 0.0
+                    p_min_pu = 0.9
                     p_max_pu = 1.0
                 else:
                     p_max_pu = 1
@@ -449,6 +449,36 @@ def add_capacity_max(n):
                     pass
             
     return
+
+def add_energy_max(n):
+    """
+    This function applies an artificial "capacity max" by limiting
+    the amount of energy that a particular carrier can produce in 
+    a given year.
+    """
+    if isinstance(capacity_limits_df, pd.DataFrame):
+        
+        carriers = capacity_limits_df.columns
+        
+        df = capacity_limits_df.copy()
+        
+        for carrier in carriers:
+            for year in df.index:
+                try:
+                    capacity_lim = df.loc[year, carrier]
+                    energy_lim = capacity_lim*(8760/resolution)
+                    name = f'{carrier} Energy Limit 2025'
+                    n.add(class_name="GlobalConstraint",
+                        type="operational_limit",
+                        investment_period=2025,
+                        sense="<=",
+                        carrier_attribute=carrier,
+                        name=f"{carrier} Energy Limit {year}",
+                        constant=energy_lim)
+                except (AttributeError, KeyError, TypeError):
+                    pass
+            
+    return
     
 
 if __name__ == "__main__":
@@ -513,7 +543,8 @@ if __name__ == "__main__":
     add_retirements(n)
     
     # add capacity constraints
-    add_capacity_max(n)
+    # add_capacity_max(n)
+    # add_energy_max(n)
 
     # add co2 constraint
     emissions_dict = snakemake.config['co2_limits']

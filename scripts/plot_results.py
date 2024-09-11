@@ -14,7 +14,7 @@ TECH_ORDER = ['Nuclear',
 
 def power_by_carrier(n):
     p_by_carrier = n.generators_t.p.T.groupby(
-        n.generators.carrier).sum().T
+        n.generators.carrier).sum().T 
 
     return p_by_carrier
 
@@ -164,7 +164,7 @@ def plot_active_units(n):
     return fig, ax
 
 
-def plot_monthly_generation(n, time_res):
+def plot_monthly_generation(n, time_res, model_years):
     p_by_carrier = power_by_carrier(n) * time_res
 
     p_by_carrier = p_by_carrier.resample('ME', level='timestep').sum()
@@ -173,13 +173,22 @@ def plot_monthly_generation(n, time_res):
 
     color = p_by_carrier.columns.map(n.carriers.color)
 
-    fig, ax = plt.subplots(figsize=(12, 8))
-    p_by_carrier.plot.area(ax=ax,
-                           color=color,
-                           fontsize=16)
+    if len(model_years) > 1:
+        fig, ax = plt.subplots(1,len(model_years), figsize=(16, 8), sharey=True)
+        for i, year in enumerate(model_years):
+            p_by_carrier.loc[str(year)].plot.area(ax=ax[i],
+                                    color=color,
+                                    fontsize=16, )
 
-    ax.set_xlabel('')
-    ax.set_ylabel('Generation [MWh]', fontsize=18)
+            ax[i].set_xlabel('')
+
+        plt.tight_layout()
+        plt.subplots_adjust(wspace=0, hspace=0)
+    else:
+        fig, ax = plt.subplots(figsize=(12,8))
+        p_by_carrier.plot.area(ax=ax,
+                                color=color,
+                                fontsize=16, )
     return fig, ax
 
 
@@ -201,5 +210,7 @@ if __name__ == "__main__":
     fig, ax = plot_active_units(n)
     plt.savefig(snakemake.output.active_units_figure)
 
-    fig, ax = plot_monthly_generation(n, time_res)
+
+    model_years = snakemake.config['model_years']
+    fig, ax = plot_monthly_generation(n, time_res, model_years)
     plt.savefig(snakemake.output.monthly_generation_figure)

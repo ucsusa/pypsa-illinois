@@ -1,20 +1,18 @@
 state_abbr: 'IL'
-version: "1.0-test"
-scenario: "wind_cf"
+version: "5.0"
+scenario: "export_and_growth_0pct"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
-time_res: 1  # hours 
+time_res: 4  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
 total_demand: 185e6  # Annual MWh in the first year
 # total_demand: 136e6  # Annual MWh in the first year
 load_growth: 0.00  # % annual growth
-load_share:
-  MISO-Z4: 0.33
-  ComEd: 0.67
+random_seed: 1234
 
-# model_years: [2025, 2030, 2035, 2040, 2045]
-model_years: [2025]
+model_years: [2025, 2030, 2035, 2040, 2045]
+# model_years: [2025]
 plot_year: 2025
 
 co2_limits:
@@ -25,12 +23,27 @@ co2_limits:
   # 2040: 6.25
   # 2045: 0.0
 
-# solar_years: [2016,2017,2018,2019,2020]  # NSRDB only accepts years 1998-2020
-# wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013
-solar_years: [2016]  # NSRDB only accepts years 1998-2020
-wind_years: [2009]  # WTK only goes from 2009-2013
+retirements: # need to have every modeled year, at least
+  Natural Gas: 
+    2025:
+    2030: 7445.50
+    2035:
+    2040:
+    2045: 11459.7
+  Coal: 
+    2025:
+    2030: 4981.60
+    2035: 2433.40
+    2040:
+    2045:
+
+
+solar_years: [2016,2017,2018,2019,2020]  # NSRDB only accepts years 1998-2020
+wind_years: [2009,2010,2011,2012,2013]  # WTK only goes from 2009-2013
+# solar_years: [2016]  # NSRDB only accepts years 1998-2020
+# wind_years: [2009]  # WTK only goes from 2009-2013
 load_year: 2019
-fuel_cost_year: 2019
+fuel_cost_year: 2023
 
 rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']
@@ -43,9 +56,9 @@ growth_rates:  # MW/year
   Natural Gas: 10e3
   Coal: 10e3
   Petroleum: 10e3
-  Batteries: 5e3
-  Solar: 5e3
-  Wind: 5e3
+  Batteries: 2.5e3
+  Solar: 2.5e3
+  Wind: 2.5e3
 
 # lifetime:
 #   Nuclear: 80
@@ -124,14 +137,14 @@ extendable_techs:  [
       # 'CTAvgCF', 
       # 'IGCCAvgCF', 
       # 'Biopower', 
-      # 'Land-Based Wind',
-      # 'Utility PV', 
+      'Land-Based Wind',
+      'Utility PV', 
       # 'LWR',
       # 'NuclearSMR', 
       # '10Hr Battery Storage', 
       # '8Hr Battery Storage',
       # '6Hr Battery Storage', 
-      # '4Hr Battery Storage', 
+      '4Hr Battery Storage', 
       # '2Hr Battery Storage'
       ]
 

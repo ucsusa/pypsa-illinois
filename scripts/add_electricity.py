@@ -15,6 +15,7 @@ idx_opts = {"rto": "balancing_authority_code",
 growth_rates = snakemake.config['growth_rates']
 pudl_year = int(snakemake.config['fuel_cost_year'])
 wind_cf = float(snakemake.config['turbine_params']['capacity_factor'])
+retirements_df = pd.DataFrame(snakemake.config['retirements']).fillna(0)
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -386,6 +387,37 @@ def attach_storage(
     return
 
 
+def add_retirements(n):
+    
+    carriers = retirements_df.columns
+    
+    df = retirements_df.loc[model_years, :].cumsum()
+    # breakpoint()
+    c_by_carrier = n.generators.groupby('carrier').sum().loc[carriers, 'p_nom']
+    
+    for carrier in carriers:
+        existing_cap = c_by_carrier.loc[carrier]
+        for year in model_years:
+            try:
+                retirement = df.loc[year, carrier]
+                remaining = max(existing_cap - retirement, 0)
+                
+                limit = remaining * (8760/resolution)
+                
+                n.add(class_name="GlobalConstraint",
+                        name=f'{carrier} limit {year}',
+                        sense='<=',
+                        carrier_attribute=carrier,
+                        constant=limit,
+                        type='operational_limit',
+                        investment_period=year,
+                        )
+            except (AttributeError, KeyError, TypeError):
+                pass
+            
+    return
+    
+
 if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input.base_network)
@@ -443,6 +475,10 @@ if __name__ == "__main__":
                        model_year=year
                        )
 
+
+    # add energy constraints
+    add_retirements(n)
+
     # add co2 constraint
     emissions_dict = snakemake.config['co2_limits']
     for y in model_years:
@@ -461,6 +497,6 @@ if __name__ == "__main__":
     # modify wind capacity factor
     wind_gen = n.generators[n.generators.carrier == 'Wind'].index
     n.generators_t.p_max_pu.loc[:, wind_gen] = ((n.generators_t.p_max_pu[wind_gen] / (
-        n.generators_t.p_max_pu[wind_gen].sum() / len(n.snapshots)) * wind_cf))
+        n.generators_t.p_max_pu[wind_gen].sum() / (len(n.snapshots))) * wind_cf))
 
     n.export_to_netcdf(snakemake.output.elec_network)

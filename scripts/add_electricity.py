@@ -467,10 +467,10 @@ def add_energy_max(n):
                 try:
                     capacity_lim = df.loc[year, carrier]
                     energy_lim = capacity_lim*(8760/resolution)
-                    name = f'{carrier} Energy Limit 2025'
+                    name = f'{carrier} Energy Limit {year}'
                     n.add(class_name="GlobalConstraint",
                         type="operational_limit",
-                        investment_period=2025,
+                        investment_period=year,
                         sense="<=",
                         carrier_attribute=carrier,
                         name=f"{carrier} Energy Limit {year}",

@@ -8,13 +8,23 @@ TECH_ORDER = ['Nuclear',
               'Natural Gas',
               'Biomass',
               'Petroleum',
+              'Wind',
               'Solar',
-              'Wind']
+              ]
 
 
 def power_by_carrier(n):
     p_by_carrier = n.generators_t.p.T.groupby(
         n.generators.carrier).sum().T 
+    
+    if not n.storage_units.empty:
+        sto = n.storage_units_t.p.T.groupby(
+            n.storage_units.carrier).sum().T
+        p_by_carrier = pd.concat([p_by_carrier, sto], axis=1)
+        
+    last_cols = [col for col in p_by_carrier.columns if col not in TECH_ORDER]
+
+    p_by_carrier = p_by_carrier[TECH_ORDER+last_cols]
 
     return p_by_carrier
 
@@ -23,13 +33,6 @@ def plot_dispatch(n, year=2025, month=7):
 
     time = (year, f'{year}-0{month}')
     p_by_carrier = power_by_carrier(n).div(1e3)
-
-    p_by_carrier = p_by_carrier[TECH_ORDER]
-
-    if not n.storage_units.empty:
-        sto = n.storage_units_t.p.T.groupby(
-            n.storage_units.carrier).sum().T.div(1e3)
-        p_by_carrier = pd.concat([p_by_carrier, sto], axis=1)
 
     # y-limits
     y_min = -n.storage_units_t.p_store.max().max() / 1e3
@@ -169,26 +172,60 @@ def plot_monthly_generation(n, time_res, model_years):
 
     p_by_carrier = p_by_carrier.resample('ME', level='timestep').sum()
 
-    p_by_carrier = p_by_carrier[TECH_ORDER]
+    # y_min = -n.storage_units_t.p_store.max().max() / 1e3
+    # y_max = n.loads_t.p_set.sum(axis=1).max() / 1e3
+    # margin = 0.1
+    # y_low = (1 + margin) * y_min
+    # y_high = (1 + margin) * y_max
+
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     color = p_by_carrier.columns.map(n.carriers.color)
-
+    
     if len(model_years) > 1:
         fig, ax = plt.subplots(1,len(model_years), figsize=(16, 8), sharey=True)
         for i, year in enumerate(model_years):
-            p_by_carrier.loc[str(year)].plot.area(ax=ax[i],
-                                    color=color,
-                                    fontsize=16, )
+            p_by_carrier.loc[str(year)].where(p_by_carrier > 0).plot.area(ax=ax[i],
+                                                                          linewidth=0,
+                                                                          color=color,
+                                                                          fontsize=16, )
 
             ax[i].set_xlabel('')
+            
+        charge = p_by_carrier.where(p_by_carrier < 0).dropna(how="all",axis=1).loc[str(year)]
+
+        if not charge.empty:
+            charge.plot.area(
+                ax=ax[i],
+                linewidth=0,
+                color=charge.columns.map(n.carriers.color),
+                # ylim=(y_low - margin, y_high + margin)
+            )
 
         plt.tight_layout()
         plt.subplots_adjust(wspace=0, hspace=0)
     else:
         fig, ax = plt.subplots(figsize=(12,8))
-        p_by_carrier.plot.area(ax=ax,
-                                color=color,
-                                fontsize=16, )
+        p_by_carrier.where(p_by_carrier > 0).plot.area(
+                ax=ax,
+                linewidth=0,
+                color=color,
+                # ylim=(y_low - margin, y_high + margin)
+            )
+
+        charge = p_by_carrier.where(
+            p_by_carrier < 0).dropna(
+            how="all",
+            axis=1)
+
+        if not charge.empty:
+            charge.plot.area(
+                ax=ax,
+                linewidth=0,
+                color=charge.columns.map(n.carriers.color),
+                # ylim=(y_low - margin, y_high + margin)
+            )
+        ax.set_label('')
     return fig, ax
 
 

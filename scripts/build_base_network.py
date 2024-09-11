@@ -6,22 +6,26 @@ import pypsa
 
 model_years = np.array(snakemake.config['model_years']).astype('int')
 resolution = int(snakemake.config['time_res'])
+myopic = snakemake.config['myopic']
 
-def add_snapshots(network):
+def add_snapshots(network, myopic=False):
 
     n_hours = 8760
     
-    snapshots = pd.DatetimeIndex([])
-    for year in model_years:
-        period = pd.date_range(start=f"{year}-01-01",
-                                        freq=f"{resolution}h",
-                                        periods=n_hours / resolution)
-        snapshots = snapshots.append(period)
-    
-    network.snapshots = pd.MultiIndex.from_arrays([snapshots.year, snapshots])
-    network.investment_periods = model_years
-    
-    network.snapshot_weightings.loc[:,:] = resolution
+    if myopic:
+        raise NotImplementedError()
+    else:
+        snapshots = pd.DatetimeIndex([])
+        for year in model_years:
+            period = pd.date_range(start=f"{year}-01-01",
+                                            freq=f"{resolution}h",
+                                            periods=n_hours / resolution)
+            snapshots = snapshots.append(period)
+        
+        network.snapshots = pd.MultiIndex.from_arrays([snapshots.year, snapshots])
+        network.investment_periods = model_years
+        
+        network.snapshot_weightings.loc[:,:] = resolution
     
     return
 
@@ -59,6 +63,5 @@ if __name__ == "__main__":
         discounts = [(1 / (1 + r) ** t) for t in range(T, T + nyears)]
         n.investment_period_weightings.at[period, "objective"] = sum(discounts)
         T += nyears
-    n.investment_period_weightings
     
     n.export_to_netcdf(snakemake.output.network)

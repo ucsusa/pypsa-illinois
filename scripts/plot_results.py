@@ -18,7 +18,7 @@ def power_by_carrier(n):
         n.generators.carrier).sum().T 
     
     if not n.storage_units.empty:
-        sto = n.storage_units_t.p.T.groupby(
+        sto = n.storage_units_t.p.T.clip(lower=0).groupby(
             n.storage_units.carrier).sum().T
         p_by_carrier = pd.concat([p_by_carrier, sto], axis=1)
         

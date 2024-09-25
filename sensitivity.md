@@ -21,3 +21,7 @@ The order in the snakemake workflow of the rules we need to modify:
 |3     |`retrieve_costs.py`      |
 |4     |`retrieve_fuel_prices.py`|
 |11    |`add_electricity.py`     |
+
+# Remove ATB cases
+
+There are no conservative or advanced cases for nuclear in the ATB which causes the model to crash. The simplest workaround is just to not do sensitivites on ATB scenarios.

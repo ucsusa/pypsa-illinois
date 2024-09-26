@@ -1,7 +1,7 @@
 # Variables to change for sensitivities
 
 - **Coal and methane prices.** Fuel prices are modeled as 12 values from a historical year, derived from this PUDL database: https://data.catalyst.coop/pudl/core_eia923__monthly_fuel_receipts_costs.
-- **ATB cases.** The model uses the 2022 ATB, which has three scenarios: "Moderate", "Conservative", and "Advanced". For sensitivity analysis we can ignore "Moderate" and just use "Conservative" and "Advanced".
+- **ATB cases.** The model uses the 2022 ATB, which has three scenarios: "Moderate", "Conservative", and "Advanced". We only use the "Moderate" case, here.
 - **Demand growth.** This will be modeled as either 0.00 or 1.00.
 - **Exports.** There's no toggle or setting for this -- rather the starting load determines whether or not the model is matching the in-state load or the in-state generation. For no export the starting value should be 136e6; for export it should be 185e6.
 

@@ -32,8 +32,10 @@ variable_combinations = list(itertools.product(
 # ATB scenarios must be handled differently because sub-parameters can't be passed to snakemake in the command line
 atb_scenario_targets = ["scenario: \'Moderate\'", "scenario: \'Conservative\'", "scenario: \'Advanced\'"]
 
-# Function to modify the atb_params in the config file (from ChatGPT)
 def replace_strings_in_config(file_path, target_strings, new_value):
+"""
+This function to modifies the `atb_params` in the `config.yml` file (from ChatGPT).
+"""
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
 

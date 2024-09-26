@@ -24,4 +24,4 @@ The order in the snakemake workflow of the rules we need to modify:
 
 # Remove ATB cases
 
-There are no conservative or advanced cases for nuclear in the ATB which causes the model to crash. The simplest workaround is just to not do sensitivites on ATB scenarios.
+There are no conservative or advanced cases for nuclear in the ATB, only moderate. As a result the model won't run for cases other than moderate, and we did not include a sensitivity around capital cost in the model.

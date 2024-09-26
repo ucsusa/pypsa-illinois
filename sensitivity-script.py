@@ -61,7 +61,6 @@ for idx, (fuel_cost_year, load_growth, total_demand, atb_scenario) in enumerate(
     # Run Snakemake, passing the new variables as configs
     print(f"Running Snakemake with config {run_no} and the following command:")
     print(f"snakemake --cores=4 --forcerun {forcerun} --config {config}")
-    os.system("snakemake --delete-all-output --cores=1")    # this could probably be optimized to not delete everything
     os.system(f"snakemake --cores=4 --forcerun {forcerun} --config {config}")
     run_no += 1
 

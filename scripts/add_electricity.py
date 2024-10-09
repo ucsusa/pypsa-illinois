@@ -101,7 +101,7 @@ def load_build_years():
     return build_years
 
 
-def linear_growth(init_value, start_year, growth_rate, end_year=2050):
+def linear_growth(init_value, start_year, growth_rate, end_year=2051):
     def model(x, init_val, start, rate):
         return rate * init_val * (x - start) + init_val
     years = np.arange(start_year, end_year, 1).astype('int')
@@ -317,7 +317,7 @@ def attach_generators(
                         and isinstance(costs_ts, pd.DataFrame)):
 
                     # select year to replicate
-                    cost_data = costs_ts.loc[str(pudl_year), carrier].values
+                    cost_data = costs_ts.loc[str(pudl_year), carrier].values[:8760]
 
                     # get the VOM cost
                     cost_data = cost_data + item.VOM

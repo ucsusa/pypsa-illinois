@@ -1,6 +1,6 @@
 state_abbr: 'IL'
-version: "11.0"
-scenario: "multi-invest-optimization-test"
+version: "1.1"
+scenario: "advanced_nuclear"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -9,9 +9,11 @@ multi_investment_periods: True
 time_res: 1  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
 # total_demand: 185e6  # Annual MWh in the first year
-total_demand: 185e6  # Annual MWh in the first year
-load_growth: 0.00  # % annual growth
+total_demand: 136e6  # Annual MWh in the first year
+load_growth: 0.01  # % annual growth
 random_seed: 1234
+
+itc_value: 0.3  # % tax credit for renewables and storage
 
 # model_years: [2025, 2030, 2035, 2040, 2045]
 model_years: [2030, 2035, 2040, 2045, 2050]
@@ -155,7 +157,7 @@ extendable_techs:  [
       'Land-Based Wind',
       'Utility PV', 
       # 'LWR',
-      # 'NuclearSMR', 
+      'NuclearSMR', 
       # '10Hr Battery Storage', 
       # '8Hr Battery Storage',
       # '6Hr Battery Storage', 

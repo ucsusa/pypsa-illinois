@@ -23,6 +23,11 @@ try:
     capacity_limits_df = pd.DataFrame(snakemake.config['capacity_max']).fillna(0)
 except:
     capacity_limits_df = None
+    
+try:
+    itc_credit = float(snakemake.config['itc_value'])
+except:
+    itc_credit = 0
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -242,7 +247,7 @@ def attach_renewables(
                       p_max_pu=p_max_pu,
                       p_nom_extendable=extendable,
                       carrier=carrier,
-                      capital_cost=item.capital_cost,
+                      capital_cost=item.capital_cost * (1-itc_credit),
                       marginal_cost=item.marginal_cost,
                       lifetime=item.lifetime,
                       build_year=build_year)
@@ -384,7 +389,7 @@ def attach_storage(
                       p_nom_min=p_nom,
                       p_nom_extendable=extendable,
                       carrier=carrier,
-                      capital_cost=item.capital_cost,
+                      capital_cost=item.capital_cost*(1-itc_credit),
                       marginal_cost=item.marginal_cost,
                       lifetime=item.lifetime,
                       max_hours=float(tech.split(' ')[0].strip('Hr')),

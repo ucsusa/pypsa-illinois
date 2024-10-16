@@ -51,4 +51,14 @@ will run the workflow illustrated in the directed acyclic graph (DAG) shown belo
 
 ![Model DAG](./dag.png)
 
+# Running the sensitivity
+
+To reproduce the sensitivity runs follow all of the set up steps described above (through step three). Then run
+
+```bash
+python sensivitiy-script.py
+```
+
+Users can optionally use the `01-results-process` notebook in the `notebooks` folder to aggregate the capacity and the generation results.
+
 

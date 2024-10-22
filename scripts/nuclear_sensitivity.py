@@ -23,7 +23,7 @@ if __name__ == "__main__":
         n_test = n.copy()
         n_test.generators.loc[n_test.generators.index.str.contains('SMR'), 'capital_cost'] = smr_cost_2030*cost
         
-        n_test.optimize(solver_name='cplex')
+        n_test.optimize(solver_name='cplex', multi_investment_periods=True)
         
         scenario = f"cost-2023_growth_0.01_demand-1.36E+08_atb-Moderate-X-{cost}_v1.1"
         

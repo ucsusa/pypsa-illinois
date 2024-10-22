@@ -1,6 +1,6 @@
 state_abbr: 'IL'
-version: "1.1"
-scenario: "advanced_nuclear"
+version: "1.0"
+scenario: "no_advanced_nuclear"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -157,7 +157,7 @@ extendable_techs:  [
       'Land-Based Wind',
       'Utility PV', 
       # 'LWR',
-      'NuclearSMR', 
+      # 'NuclearSMR', 
       # '10Hr Battery Storage', 
       # '8Hr Battery Storage',
       # '6Hr Battery Storage', 

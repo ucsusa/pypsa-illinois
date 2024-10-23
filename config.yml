@@ -1,6 +1,6 @@
 state_abbr: 'IL'
-version: "3.0"
-scenario: "advanced_nuclear_learning"
+version: "2.0"
+scenario: "tax_incentives"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -13,7 +13,7 @@ total_demand: 185e6  # Annual MWh in the first year
 load_growth: 0.02  # % annual growth
 random_seed: 1234
 
-ptc_value: 27.5
+ptc_value: 27.5  # $/MWh, solar, pv, advanced nuclear
 itc_value: 0.3  # % tax credit for renewables and storage
 
 # model_years: [2025, 2030, 2035, 2040, 2045]
@@ -162,7 +162,7 @@ extendable_techs:  [
       'Land-Based Wind',
       'Utility PV', 
       # 'LWR',
-      'NuclearSMR', 
+      # 'NuclearSMR', 
       # '10Hr Battery Storage', 
       # '8Hr Battery Storage',
       # '6Hr Battery Storage', 

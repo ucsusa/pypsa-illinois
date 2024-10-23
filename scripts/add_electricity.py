@@ -237,19 +237,16 @@ def attach_renewables(
                         continue
                     name = f"{bus} {tech} EXIST"
                     extendable = False
+                    marginal_cost = item.marginal_cost
                 elif model_year:
                     build_year = model_year
                     p_nom = 0.0
                     name = f"{bus} {tech} {model_year}"
                     extendable = tech in snakemake.config['extendable_techs']
                     build_year = model_year
+                    marginal_cost = item.marginal_cost - ptc_credit
 
                 p_max_pu = re_profile[bus]
-                
-                if carrier in ['Solar']:
-                    capital_cost = item.capital_cost * (1-itc_credit)
-                elif carrier in ['Wind']:
-                    capital_cost = item.capital_cost
 
                 n.add(class_name="Generator",
                       name=name,
@@ -259,8 +256,8 @@ def attach_renewables(
                       p_max_pu=p_max_pu,
                       p_nom_extendable=extendable,
                       carrier=carrier,
-                      capital_cost=capital_cost,
-                      marginal_cost=item.marginal_cost,
+                      capital_cost=item.capital_cost,
+                      marginal_cost=marginal_cost,
                       lifetime=item.lifetime,
                       build_year=build_year)
     return
@@ -328,6 +325,13 @@ def attach_generators(
                 else:
                     p_max_pu = 1
                     p_min_pu = 0
+                    
+                    
+                # add ptc
+                if (tech in ['NuclearSMR']) & ('EXIST' not in name):
+                    capital_cost = item.capital_cost * (1-itc_credit)
+                else:
+                    capital_cost = item.capital_cost
 
                 # time series marginal costs
                 if ((tech in ['CTAvgCF', 'CCAvgCF', 'IGCCAvgCF'])
@@ -352,7 +356,7 @@ def attach_generators(
                       p_min_pu=p_min_pu,
                       p_max_pu=p_max_pu,
                       carrier=carrier,
-                      capital_cost=item.capital_cost,
+                      capital_cost=capital_cost,
                       marginal_cost=marginal_cost,
                       lifetime=item.lifetime,
                       ramp_limit_down=ramp_limit_down,

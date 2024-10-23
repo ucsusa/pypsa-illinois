@@ -28,6 +28,11 @@ try:
     itc_credit = float(snakemake.config['itc_value'])
 except:
     itc_credit = 0
+    
+try:
+    ptc_credit = float(snakemake.config['ptc_value'])
+except:
+    ptc_credit = 0
 
 BUILD_YEAR = 2025  # a universal build year place holder
 

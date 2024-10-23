@@ -14,7 +14,7 @@ load_growth: 0.02  # % annual growth
 random_seed: 1234
 
 ptc_value: 27.5  # $/MWh, solar, pv, advanced nuclear
-itc_value: 0.3  # % tax credit for renewables and storage
+itc_value: 0.4  # % tax credit for renewables and storage
 
 # model_years: [2025, 2030, 2035, 2040, 2045]
 model_years: [2030, 2035, 2040, 2045, 2050]
@@ -146,7 +146,13 @@ turbine_params:
   diameter: 103 # m
   rated_power: 2.75  # MW
   air_density: 1.225  # kg/m^3
-  capacity_factor: 0.382  # average annual capacity factor
+  current_capacity_factor: 0.382  # average annual capacity factor
+  capacity_factor: 
+    2030: 0.39
+    2035: 0.3975
+    2040: 0.405
+    2045: 0.4125
+    2050: 0.42
 
 nuclear_params:  # for existing reactors, 2023 NEI costs in context
   capacity_factor: 0.972

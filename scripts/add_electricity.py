@@ -13,7 +13,8 @@ idx_opts = {"rto": "balancing_authority_code",
             "county": "county"}
 growth_rates = snakemake.config['growth_rates']
 pudl_year = int(snakemake.config['fuel_cost_year'])
-wind_cf = float(snakemake.config['turbine_params']['capacity_factor'])
+wind_cf = float(snakemake.config['turbine_params']['current_capacity_factor'])
+wind_cf_list = snakemake.config['turbine_params']['capacity_factor']
 try: 
     retirements_df = pd.DataFrame(snakemake.config['retirements']).fillna(0)
 except:
@@ -584,7 +585,17 @@ if __name__ == "__main__":
 
     # modify wind capacity factor
     wind_gen = n.generators[n.generators.carrier == 'Wind'].index
-    n.generators_t.p_max_pu.loc[:, wind_gen] = ((n.generators_t.p_max_pu[wind_gen] / (
-        n.generators_t.p_max_pu[wind_gen].sum() / (len(n.snapshots))) * wind_cf))
+    
+    wind_vintage = wind_gen[wind_gen.str.contains('EXIST')] 
+    
+    n.generators_t.p_max_pu.loc[:, wind_vintage] = ((n.generators_t.p_max_pu[wind_vintage] / 
+                                                    (n.generators_t.p_max_pu[wind_vintage].sum() / 
+                                                    (len(n.snapshots))) * wind_cf))
+    
+    for year in model_years:
+        wind_vintage = wind_gen[wind_gen.str.contains(str(year))] 
+        n.generators_t.p_max_pu.loc[:, wind_vintage] = ((n.generators_t.p_max_pu[wind_vintage] / 
+                                                     (n.generators_t.p_max_pu[wind_vintage].sum() / 
+                                                      (len(n.snapshots))) * float(wind_cf_list[year])))
 
     n.export_to_netcdf(snakemake.output.elec_network)

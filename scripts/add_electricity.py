@@ -61,7 +61,7 @@ def load_costs():
     r = float(snakemake.config['discount_rate'])
     lifetimes = snakemake.config['lifetime']
 
-    costs = costs.assign(rate=r, lifetime=20)
+    costs = costs.assign(discount_rate=r, lifetime=20)
 
     # assign lifetimes to technologies
     carriers = snakemake.config['atb_params']['carrier']
@@ -69,7 +69,9 @@ def load_costs():
         costs.loc[(carrier, slice(None), slice(None)),
                   'lifetime'] = float(lifetimes[carrier])
 
-    annuity_col = annuity(costs["rate"], costs["lifetime"])
+    
+    rate_col = snakemake.config['rate']
+    annuity_col = annuity(costs[rate_col], costs["lifetime"])
 
     costs = costs.assign(
         capital_cost=(
@@ -238,6 +240,11 @@ def attach_renewables(
                     build_year = model_year
 
                 p_max_pu = re_profile[bus]
+                
+                if carrier in ['Solar']:
+                    capital_cost = item.capital_cost * (1-itc_credit)
+                elif carrier in ['Wind']:
+                    capital_cost = item.capital_cost
 
                 n.add(class_name="Generator",
                       name=name,
@@ -247,7 +254,7 @@ def attach_renewables(
                       p_max_pu=p_max_pu,
                       p_nom_extendable=extendable,
                       carrier=carrier,
-                      capital_cost=item.capital_cost * (1-itc_credit),
+                      capital_cost=capital_cost,
                       marginal_cost=item.marginal_cost,
                       lifetime=item.lifetime,
                       build_year=build_year)
@@ -526,9 +533,9 @@ if __name__ == "__main__":
 
     # add new technology
     for year in model_years:
-        # current_costs = costs.xs((slice(None), slice(None), year))
-        # current_costs = current_costs.reset_index()
-        # current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
+        current_costs = costs.xs((slice(None), slice(None), year))
+        current_costs = current_costs.reset_index()
+        current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
         attach_renewables(n,
                           costs=current_costs,
                           model_year=year

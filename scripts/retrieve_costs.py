@@ -48,25 +48,65 @@ if __name__ == "__main__":
                                      'core_metric_variable'],
                               columns='core_metric_parameter',
                               values='value')
-    df_pivot = df_pivot.xs((atb_params['scenario'],
-                            atb_params['case'],
-                            str(atb_params['crp']),
-                            slice(None),
-                            slice(None),
-                            slice(None)
-                            ))
-    df_pivot = df_pivot.loc[(atb_params['carrier'],
+    # breakpoint()
+    df_pivot = df_pivot.xs((atb_params['scenario'], 
+                            atb_params['case'], 
+                            slice(None), 
+                            slice(None), 
+                            slice(None), 
+                            slice(None)))
+    
+    wacc_data = df_pivot.loc[('*', 
+                              atb_params['carrier'], 
+                              slice(None), 
+                              slice(None)), 
+                             ['WACC Nominal', 'WACC Real']]
+    wacc_data.to_csv("data/wacc.csv")
+    
+    # df_pivot = df_pivot.xs((atb_params['scenario'],
+    #                         atb_params['case'],
+    #                         str(atb_params['crp']),
+    #                         slice(None),
+    #                         slice(None),
+    #                         slice(None)
+    #                         ))
+    
+    df_pivot = df_pivot.loc[(str(atb_params['crp']),
+                             atb_params['carrier'],
                              atb_params['technology'],
                              slice(None)),
                             ['CAPEX', 'Fixed O&M',
-                             'Variable O&M', 'Fuel']]\
-        .dropna(axis=0, how='all')\
-        .drop_duplicates(keep='first')
+                             'Variable O&M', 'Fuel']]
 
     df_pivot.rename(columns={'Fixed O&M': 'FOM',
                              'Variable O&M': 'VOM',
                              },
                     inplace=True)
+    
+    df_pivot = df_pivot.reset_index()
+    wacc_data = wacc_data.reset_index()
+    
+    wacc_data['crpyears'] = str(atb_params['crp'])
+    
+    merged_data = df_pivot.merge(wacc_data, 
+                                 on=['technology_alias',
+                                     'core_metric_variable',
+                                     'crpyears'],
+                                 how='left')
+    
+    merged_data = merged_data.drop(columns=['techdetail_y','crpyears'])
+    merged_data.rename(columns={'techdetail_x':'techdetail'}, inplace=True)
+    merged_data = merged_data.loc[~((merged_data['technology_alias']=='Wind') 
+                                    & (merged_data['techdetail'] == 'Utility PV'))]
+    merged_data = merged_data.loc[~((merged_data['technology_alias']=='Solar') 
+                                    & (merged_data['techdetail'] == 'Land-Based Wind'))]
+    
+    df_pivot = merged_data.set_index(['technology_alias','techdetail','core_metric_variable'])
+    
+    
+    wacc_data = wacc_data.drop(columns=['crpyears', 
+                                        'techdetail']).set_index(['technology_alias',
+                                                                  'core_metric_variable'])
     # add natural gas and coal costs
 
     prices_url = "https://www.eia.gov/electricity/annual/html/epa_07_04.html"
@@ -111,12 +151,16 @@ if __name__ == "__main__":
                  'Fuel'] = coal_price * coal_heatrate
     # add petroleum
     df_t = df_pivot.T
-
     # [capital cost, fixed om cost, variable om cost, fuel cost]
     for year in range(2020, 2051, 1):
         # update costs for existing nuclear, these costs are from 2022
         df_t['Nuclear', 'LWR', year] = [
-            nuclear_cap_cost, nuclear_fixed_om, 0, nuclear_fuel]
+            nuclear_cap_cost, 
+            nuclear_fixed_om, 
+            0, 
+            nuclear_fuel, 
+            wacc_data.loc[('Nuclear',year), 'WACC Nominal'],
+            wacc_data.loc[('Nuclear',year), 'WACC Real'],]
 
         # these costs are from 2021 and should be updated to reflect inflation.
         # from here https://www.eia.gov/electricity/generatorcosts/
@@ -124,8 +168,20 @@ if __name__ == "__main__":
                                                 27.94,
                                                 1.78,
                                                 (petroleum_price *
-                                                 petroleum_heatrate)]
+                                                 petroleum_heatrate),
+                                                float(snakemake.config['discount_rate']),
+                                                float(snakemake.config['discount_rate'])]
     df_pivot = df_t.T
+
+    # set values for the battery WACC
+    df_pivot.loc[('Batteries', 
+                '4Hr Battery Storage', 
+                slice(None)), 
+                ['WACC Real']] = float(snakemake.config['battery_wacc_real'])
+    df_pivot.loc[('Batteries', 
+                '4Hr Battery Storage', 
+                slice(None)), 
+                ['WACC Nominal']] = float(snakemake.config['battery_wacc_nom'])
 
     df_pivot.fillna(0., inplace=True)
 

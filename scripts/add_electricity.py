@@ -328,7 +328,7 @@ def attach_generators(
                     
                     
                 # add ptc
-                if (tech in ['NuclearSMR']) & ('EXIST' not in name):
+                if (tech in ['Biopower', 'NuclearSMR']) & ('EXIST' not in name):
                     capital_cost = item.capital_cost * (1-itc_credit)
                 else:
                     capital_cost = item.capital_cost

@@ -1,6 +1,6 @@
 state_abbr: 'IL'
-version: "2.0"
-scenario: "tax_incentives"
+version: "3.0"
+scenario: "illinois"
 
 solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
@@ -8,12 +8,12 @@ myopic: False
 multi_investment_periods: True
 time_res: 1  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
-total_demand: 185e6  # Annual MWh in the first year
-# total_demand: 136e6  # Annual MWh in the first year
+# total_demand: 185e6  # Annual MWh in the first year
+total_demand: 140e6  # Annual MWh in the first year
 load_growth: 0.02  # % annual growth
 random_seed: 1234
 
-ptc_value: 27.5  # $/MWh, solar, pv, advanced nuclear
+ptc_value: 30  # $/MWh, solar, pv, advanced nuclear
 itc_value: 0.4  # % tax credit for renewables and storage
 
 # model_years: [2025, 2030, 2035, 2040, 2045]

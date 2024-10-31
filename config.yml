@@ -1,17 +1,20 @@
 state_abbr: 'IL'
-version: "11.0"
-scenario: "multi-invest-optimization-test"
+version: "3.0"
+scenario: "illinois"
 
-solver: 'highs'  # 'cplex','highs','gurobi'
+solver: 'cplex'  # 'cplex','highs','gurobi'
 geo_res: 'rto'  # accepts: 'rto' or 'county'
 myopic: False
 multi_investment_periods: True
-time_res: 8  # hours 
+time_res: 1  # hours 
 load_filter: 60e3  # MW, load above this level will be removed as outliers.
 # total_demand: 185e6  # Annual MWh in the first year
-total_demand: 136e6  # Annual MWh in the first year
-load_growth: 0.00  # % annual growth
+total_demand: 140e6  # Annual MWh in the first year
+load_growth: 0.02  # % annual growth
 random_seed: 1234
+
+ptc_value: 30  # $/MWh, solar, pv, advanced nuclear
+itc_value: 0.4  # % tax credit for renewables and storage
 
 # model_years: [2025, 2030, 2035, 2040, 2045]
 model_years: [2030, 2035, 2040, 2045, 2050]
@@ -64,6 +67,10 @@ rto_subba: ['0004','CE']  # MISO-Z4, ComEd
 region_names: ['MISO-Z4','ComEd']
 
 discount_rate: 0.07
+battery_wacc_nom: 0.055
+battery_wacc_real: 0.038  
+
+rate: 'WACC Real'  # accepts: 'WACC Nominal', 'discount_rate'
 
 growth_rates:  # MW/year
   Nuclear: "inf"
@@ -139,7 +146,13 @@ turbine_params:
   diameter: 103 # m
   rated_power: 2.75  # MW
   air_density: 1.225  # kg/m^3
-  capacity_factor: 0.35  # average annual capacity factor
+  current_capacity_factor: 0.382  # average annual capacity factor
+  capacity_factor: 
+    2030: 0.39
+    2035: 0.3975
+    2040: 0.405
+    2045: 0.4125
+    2050: 0.42
 
 nuclear_params:  # for existing reactors, 2023 NEI costs in context
   capacity_factor: 0.972

@@ -13,7 +13,8 @@ idx_opts = {"rto": "balancing_authority_code",
             "county": "county"}
 growth_rates = snakemake.config['growth_rates']
 pudl_year = int(snakemake.config['fuel_cost_year'])
-wind_cf = float(snakemake.config['turbine_params']['capacity_factor'])
+wind_cf = float(snakemake.config['turbine_params']['current_capacity_factor'])
+wind_cf_list = snakemake.config['turbine_params']['capacity_factor']
 try: 
     retirements_df = pd.DataFrame(snakemake.config['retirements']).fillna(0)
 except:
@@ -23,6 +24,16 @@ try:
     capacity_limits_df = pd.DataFrame(snakemake.config['capacity_max']).fillna(0)
 except:
     capacity_limits_df = None
+    
+try:
+    itc_credit = float(snakemake.config['itc_value'])
+except:
+    itc_credit = 0
+    
+try:
+    ptc_credit = float(snakemake.config['ptc_value'])
+except:
+    ptc_credit = 0
 
 BUILD_YEAR = 2025  # a universal build year place holder
 
@@ -56,7 +67,7 @@ def load_costs():
     r = float(snakemake.config['discount_rate'])
     lifetimes = snakemake.config['lifetime']
 
-    costs = costs.assign(rate=r, lifetime=20)
+    costs = costs.assign(discount_rate=r, lifetime=20)
 
     # assign lifetimes to technologies
     carriers = snakemake.config['atb_params']['carrier']
@@ -64,7 +75,9 @@ def load_costs():
         costs.loc[(carrier, slice(None), slice(None)),
                   'lifetime'] = float(lifetimes[carrier])
 
-    annuity_col = annuity(costs["rate"], costs["lifetime"])
+    
+    rate_col = snakemake.config['rate']
+    annuity_col = annuity(costs[rate_col], costs["lifetime"])
 
     costs = costs.assign(
         capital_cost=(
@@ -101,7 +114,7 @@ def load_build_years():
     return build_years
 
 
-def linear_growth(init_value, start_year, growth_rate, end_year=2050):
+def linear_growth(init_value, start_year, growth_rate, end_year=2051):
     def model(x, init_val, start, rate):
         return rate * init_val * (x - start) + init_val
     years = np.arange(start_year, end_year, 1).astype('int')
@@ -225,12 +238,14 @@ def attach_renewables(
                         continue
                     name = f"{bus} {tech} EXIST"
                     extendable = False
+                    marginal_cost = item.marginal_cost
                 elif model_year:
                     build_year = model_year
                     p_nom = 0.0
                     name = f"{bus} {tech} {model_year}"
                     extendable = tech in snakemake.config['extendable_techs']
                     build_year = model_year
+                    marginal_cost = item.marginal_cost - ptc_credit
 
                 p_max_pu = re_profile[bus]
 
@@ -243,7 +258,7 @@ def attach_renewables(
                       p_nom_extendable=extendable,
                       carrier=carrier,
                       capital_cost=item.capital_cost,
-                      marginal_cost=item.marginal_cost,
+                      marginal_cost=marginal_cost,
                       lifetime=item.lifetime,
                       build_year=build_year)
     return
@@ -311,13 +326,20 @@ def attach_generators(
                 else:
                     p_max_pu = 1
                     p_min_pu = 0
+                    
+                    
+                # add ptc
+                if (tech in ['Biopower', 'NuclearSMR']) & ('EXIST' not in name):
+                    capital_cost = item.capital_cost * (1-itc_credit)
+                else:
+                    capital_cost = item.capital_cost
 
                 # time series marginal costs
                 if ((tech in ['CTAvgCF', 'CCAvgCF', 'IGCCAvgCF'])
                         and isinstance(costs_ts, pd.DataFrame)):
 
                     # select year to replicate
-                    cost_data = costs_ts.loc[str(pudl_year), carrier].values
+                    cost_data = costs_ts.loc[str(pudl_year), carrier].values[:8760]
 
                     # get the VOM cost
                     cost_data = cost_data + item.VOM
@@ -335,7 +357,7 @@ def attach_generators(
                       p_min_pu=p_min_pu,
                       p_max_pu=p_max_pu,
                       carrier=carrier,
-                      capital_cost=item.capital_cost,
+                      capital_cost=capital_cost,
                       marginal_cost=marginal_cost,
                       lifetime=item.lifetime,
                       ramp_limit_down=ramp_limit_down,
@@ -384,7 +406,7 @@ def attach_storage(
                       p_nom_min=p_nom,
                       p_nom_extendable=extendable,
                       carrier=carrier,
-                      capital_cost=item.capital_cost,
+                      capital_cost=item.capital_cost*(1-itc_credit),
                       marginal_cost=item.marginal_cost,
                       lifetime=item.lifetime,
                       max_hours=float(tech.split(' ')[0].strip('Hr')),
@@ -521,9 +543,9 @@ if __name__ == "__main__":
 
     # add new technology
     for year in model_years:
-        # current_costs = costs.xs((slice(None), slice(None), year))
-        # current_costs = current_costs.reset_index()
-        # current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
+        current_costs = costs.xs((slice(None), slice(None), year))
+        current_costs = current_costs.reset_index()
+        current_costs.loc[current_costs['technology_alias']=='Solar', 'techdetail'] = 'Utility PV'
         attach_renewables(n,
                           costs=current_costs,
                           model_year=year
@@ -563,7 +585,17 @@ if __name__ == "__main__":
 
     # modify wind capacity factor
     wind_gen = n.generators[n.generators.carrier == 'Wind'].index
-    n.generators_t.p_max_pu.loc[:, wind_gen] = ((n.generators_t.p_max_pu[wind_gen] / (
-        n.generators_t.p_max_pu[wind_gen].sum() / (len(n.snapshots))) * wind_cf))
+    
+    wind_vintage = wind_gen[wind_gen.str.contains('EXIST')] 
+    
+    n.generators_t.p_max_pu.loc[:, wind_vintage] = ((n.generators_t.p_max_pu[wind_vintage] / 
+                                                    (n.generators_t.p_max_pu[wind_vintage].sum() / 
+                                                    (len(n.snapshots))) * wind_cf))
+    
+    for year in model_years:
+        wind_vintage = wind_gen[wind_gen.str.contains(str(year))] 
+        n.generators_t.p_max_pu.loc[:, wind_vintage] = ((n.generators_t.p_max_pu[wind_vintage] / 
+                                                     (n.generators_t.p_max_pu[wind_vintage].sum() / 
+                                                      (len(n.snapshots))) * float(wind_cf_list[year])))
 
     n.export_to_netcdf(snakemake.output.elec_network)

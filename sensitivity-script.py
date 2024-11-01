@@ -13,7 +13,7 @@ shutil.copyfile(base_config_file, backup_config_file)
 # Define the variables and their possible values
 variable_ranges = {
     'fuel_cost_year': [2023],
-    'load_growth': [0.0],  #[0.01, 0.02, 0.025],
+    'load_growth': [0.0, 0.01, 0.02, 0.025],
     'total_demand': [140e6, 185e6],
     'atb_scenario': ['Moderate']  # 'Conservative', 'Advanced'
 }

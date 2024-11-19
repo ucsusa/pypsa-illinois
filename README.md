@@ -45,6 +45,8 @@ Running the command
 
 ```bash
 snakemake --cores=1
+# or
+snakemake -j1
 ```
 
 will run the workflow illustrated in the directed acyclic graph (DAG) shown below.
